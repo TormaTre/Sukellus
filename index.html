@@ -869,6 +869,8 @@
             const diver = event.divers.find(d => d.id === diverId);
             if (confirm(`Haluatko varmasti päättää sukelluksen sukeltajalle ${diver.name}?`)) {
                 console.log('Stopping dive for diver:', diverId);
+
+
                 clearInterval(timers[diverId]);
                 delete timers[diverId];
                 diver.diveEnded = true;
@@ -897,48 +899,61 @@
         // Generate PDF in portrait mode
         function generatePdf() {
             console.log('Generating PDF for event:', currentEventId);
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait' });
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const maxLineWidth = pageWidth - 30; // 15mm margin for indented lines
-
-            // Header
-            doc.setFontSize(16);
-            doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
-            doc.setFontSize(12);
-            doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
-            doc.text(`Päivämäärä: ${event.date}`, 10, 30);
-            doc.text('Sukeltajat:', 10, 40);
-
-            // Diver details
-            let y = 50;
-            const event = events.find(e => e.id === currentEventId);
-            event.divers.forEach(diver => {
-                const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                // Diver name
-                doc.text(`${diver.name}`, 10, y);
-                y += 7;
-                // Planned details (indented)
-                const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
-                const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
-                doc.text(plannedLines, 15, y); // Indented by 15mm
-                y += plannedLines.length * 7;
-                // Actual details (indented)
-                const actualText = `Toteutunut aika: ${formatTime(diver.diveTime)}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Käytetty kaasu: ${diver.airConsumption || '-'} L, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
-                const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
-                doc.text(actualLines, 15, y); // Indented by 15mm
-                y += actualLines.length * 7;
-                if (y > 270) { // Add new page if near bottom (A4 height is 297mm)
-                    doc.addPage();
-                    y = 10;
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library not loaded');
                 }
-            });
+                const doc = new jsPDF({ orientation: 'portrait' });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const maxLineWidth = pageWidth - 30; // 15mm margin for indented lines
 
-            doc.save(`${event.location}_Sukelluspöytäkirja.pdf`);
+                const event = events.find(e => e.id === currentEventId);
+                if (!event) {
+                    throw new Error('Event not found for ID: ' + currentEventId);
+                }
+
+                // Header
+                doc.setFontSize(16);
+                doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
+                doc.setFontSize(12);
+                doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
+                doc.text(`Päivämäärä: ${event.date}`, 10, 30);
+                doc.text('Sukeltajat:', 10, 40);
+
+                // Diver details
+                let y = 50;
+                event.divers.forEach(diver => {
+                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
+                    // Diver name
+                    doc.text(`${diver.name || 'Nimetön'}`, 10, y);
+                    y += 7;
+                    // Planned details (indented)
+                    const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
+                    const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
+                    doc.text(plannedLines, 15, y); // Indented by 15mm
+                    y += plannedLines.length * 7;
+                    // Actual details (indented)
+                    const actualText = `Toteutunut aika: ${formatTime(diver.diveTime || 0)}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Käytetty kaasu: ${diver.airConsumption || '-'} L, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
+                    const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
+                    doc.text(actualLines, 15, y); // Indented by 15mm
+                    y += actualLines.length * 7;
+                    if (y > 270) { // Add new page if near bottom (A4 height is 297mm)
+                        doc.addPage();
+                        y = 10;
+                    }
+                });
+
+                doc.save(`${event.location}_Sukelluspöytäkirja.pdf`);
+                console.log('PDF generated successfully');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Virhe PDF:n luomisessa: ' + error.message);
+            }
         }
 
         // Initialize
-        loadTheme(); // Load theme on page load
+        loadTheme();
         showMainView();
     </script>
 </body>
