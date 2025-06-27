@@ -20,9 +20,9 @@
         .event-header { margin-bottom: 20px; }
         .font-weight-bold { font-weight: bold; }
         .mb-2 { margin-bottom: 0.5rem; }
+        .input-span { cursor: pointer; text-decoration: underline; }
         .buddy-checkboxes { max-height: 100px; overflow-y: auto; }
-        .notes-span { cursor: pointer; text-decoration: underline; }
-        .final-pressure-span { cursor: pointer; text-decoration: underline; }
+        #mixedGasInput { display: none; }
     </style>
 </head>
 <body>
@@ -80,12 +80,134 @@
         </form>
     </div>
 
+    <!-- Bottle Size Modal -->
+    <div class="modal fade" id="bottleSizeModal" tabindex="-1" aria-labelledby="bottleSizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bottleSizeModalLabel">Syötä Pullon Koko</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBottleSize()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pressure Modal -->
+    <div class="modal fade" id="pressureModal" tabindex="-1" aria-labelledby="pressureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pressureModalLabel">Syötä Paine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="savePressure()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gas Modal -->
+    <div class="modal fade" id="gasModal" tabindex="-1" aria-labelledby="gasModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gasModalLabel">Valitse Kaasu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gasType" id="gasAir" value="Ilma" checked>
+                        <label class="form-check-label" for="gasAir">Ilma</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gasType" id="gasMixed" value="Seoskaasu">
+                        <label class="form-check-label" for="gasMixed">Seoskaasu</label>
+                    </div>
+                    <input type="text" class="form-control mt-2" id="mixedGasInput" placeholder="Syötä seoskaasu (esim. Nitrox 32%)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveGas()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planned Time Modal -->
+    <div class="modal fade" id="plannedTimeModal" tabindex="-1" aria-labelledby="plannedTimeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="plannedTimeModalLabel">Syötä Suunniteltu Aika</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" class="form-control" id="plannedTimeInput" placeholder="Aika (min)" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlannedTime()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planned Depth Modal -->
+    <div class="modal fade" id="plannedDepthModal" tabindex="-1" aria-labelledby="plannedDepthModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="plannedDepthModalLabel">Syötä Suunniteltu Syvyys</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" class="form-control" id="plannedDepthInput" placeholder="Syvyys (m)" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlannedDepth()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buddy Modal -->
+    <div class="modal fade" id="buddyModal" tabindex="-1" aria-labelledby="buddyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="buddyModalLabel">Valitse Pari</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="buddyCheckboxes" class="buddy-checkboxes"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBuddies()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Notes Modal -->
     <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="notesModalLabel">Muokkaa Muistiinpanoja</h5>
+                    <h5 class="modal-title" id="notesModalLabel">Syötä Muistiinpanot</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
                 </div>
                 <div class="modal-body">
@@ -108,7 +230,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="number" class="form-control" id="finalPressureInput" placeholder="Lopullinen paine (bar)">
+                    <input type="number" class="form-control" id="finalPressureInput" placeholder="Lopullinen paine (bar)" min="0">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
@@ -190,14 +312,10 @@
         // Show new event form
         function showNewEventForm() {
             console.log('Showing new event form');
-            try {
-                document.getElementById('mainView').style.display = 'none';
-                document.getElementById('newEventForm').style.display = 'block';
-                document.getElementById('eventView').style.display = 'none';
-                document.getElementById('addDiverForm').style.display = 'none';
-            } catch (error) {
-                console.error('Error in showNewEventForm:', error);
-            }
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('newEventForm').style.display = 'block';
+            document.getElementById('eventView').style.display = 'none';
+            document.getElementById('addDiverForm').style.display = 'none';
         }
 
         // Show event view
@@ -293,6 +411,165 @@
             }
         }
 
+        // Open bottle size modal
+        function openBottleSizeModal(diverId) {
+            console.log('Opening bottle size modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('bottleSizeInput').value = diver.bottleSize || '';
+            const modal = new bootstrap.Modal(document.getElementById('bottleSizeModal'));
+            modal.show();
+        }
+
+        // Save bottle size
+        function saveBottleSize() {
+            console.log('Saving bottle size for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.bottleSize = document.getElementById('bottleSizeInput').value;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('bottleSizeModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open pressure modal
+        function openPressureModal(diverId) {
+            console.log('Opening pressure modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('pressureInput').value = diver.pressure || '';
+            const modal = new bootstrap.Modal(document.getElementById('pressureModal'));
+            modal.show();
+        }
+
+        // Save pressure
+        function savePressure() {
+            console.log('Saving pressure for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.pressure = document.getElementById('pressureInput').value;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('pressureModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open gas modal
+        function openGasModal(diverId) {
+            console.log('Opening gas modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('gasAir').checked = diver.gas === 'Ilma' || !diver.gas;
+            document.getElementById('gasMixed').checked = diver.gas && diver.gas !== 'Ilma';
+            document.getElementById('mixedGasInput').value = diver.gas && diver.gas !== 'Ilma' ? diver.gas : '';
+            document.getElementById('mixedGasInput').style.display = document.getElementById('gasMixed').checked ? 'block' : 'none';
+            const modal = new bootstrap.Modal(document.getElementById('gasModal'));
+            modal.show();
+        }
+
+        // Toggle mixed gas input visibility
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'gasType') {
+                document.getElementById('mixedGasInput').style.display = e.target.value === 'Seoskaasu' ? 'block' : 'none';
+            }
+        });
+
+        // Save gas
+        function saveGas() {
+            console.log('Saving gas for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            const gasType = document.querySelector('input[name="gasType"]:checked').value;
+            diver.gas = gasType === 'Ilma' ? 'Ilma' : document.getElementById('mixedGasInput').value || 'Seoskaasu';
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('gasModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open planned time modal
+        function openPlannedTimeModal(diverId) {
+            console.log('Opening planned time modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('plannedTimeInput').value = diver.plannedTime || '';
+            const modal = new bootstrap.Modal(document.getElementById('plannedTimeModal'));
+            modal.show();
+        }
+
+        // Save planned time
+        function savePlannedTime() {
+            console.log('Saving planned time for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.plannedTime = document.getElementById('plannedTimeInput').value;
+            diver.timeLeft = parseInt(diver.plannedTime);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('plannedTimeModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open planned depth modal
+        function openPlannedDepthModal(diverId) {
+            console.log('Opening planned depth modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('plannedDepthInput').value = diver.plannedDepth || '';
+            const modal = new bootstrap.Modal(document.getElementById('plannedDepthModal'));
+            modal.show();
+        }
+
+        // Save planned depth
+        function savePlannedDepth() {
+            console.log('Saving planned depth for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.plannedDepth = document.getElementById('plannedDepthInput').value;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('plannedDepthModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open buddy modal
+        function openBuddyModal(diverId) {
+            console.log('Opening buddy modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            const buddyCheckboxes = document.getElementById('buddyCheckboxes');
+            buddyCheckboxes.innerHTML = event.divers.map(d => d.id !== diverId ? `
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input buddy-checkbox" data-buddy-id="${d.id}" ${diver.buddies.includes(d.id) ? 'checked' : ''}>
+                    <label class="form-check-label">${d.name}</label>
+                </div>
+            ` : '').join('');
+            const modal = new bootstrap.Modal(document.getElementById('buddyModal'));
+            modal.show();
+        }
+
+        // Save buddies
+        function saveBuddies() {
+            console.log('Saving buddies for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
+            diver.buddies = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.buddyId);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
         // Open notes modal
         function openNotesModal(diverId) {
             console.log('Opening notes modal for diver:', diverId);
@@ -304,7 +581,7 @@
             modal.show();
         }
 
-        // Save notes from modal
+        // Save notes
         function saveNotes() {
             console.log('Saving notes for diver:', currentDiverId);
             const event = events.find(e => e.id === currentEventId);
@@ -327,14 +604,15 @@
             modal.show();
         }
 
-        // Save final pressure from modal
+        // Save final pressure
         function saveFinalPressure() {
             console.log('Saving final pressure for diver:', currentDiverId);
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === currentDiverId);
-            diver.finalPressure = document.getElementById('finalPressureInput').value;
-            if (diver.pressure && diver.finalPressure) {
-                const usedPressure = parseFloat(diver.pressure) - parseFloat(diver.finalPressure);
+            const finalPressure = document.getElementById('finalPressureInput').value;
+            diver.finalPressure = finalPressure;
+            if (diver.pressure && finalPressure) {
+                const usedPressure = parseFloat(diver.pressure) - parseFloat(finalPressure);
                 diver.airConsumption = usedPressure * parseFloat(diver.bottleSize);
             } else {
                 diver.airConsumption = '';
@@ -366,72 +644,58 @@
                 <div class="col-md-2">Nimi</div>
                 <div class="col-md-1">Pullon koko</div>
                 <div class="col-md-1">Paine</div>
+                <div class="col-md-1">Kaasu</div>
                 <div class="col-md-1">Suunniteltu aika</div>
                 <div class="col-md-1">Suunniteltu syvyys</div>
                 <div class="col-md-1">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
-                <div class="col-md-2">Sukellusaika</div>
+                <div class="col-md-1">Sukellusaika</div>
                 <div class="col-md-1">Jäljellä oleva aika</div>
                 <div class="col-md-1">Lopullinen paine</div>
                 <div class="col-md-1">Toiminnot</div>
             `;
             diverList.appendChild(headerDiv);
 
-            // List divers in order of addition (no buddy grouping)
+            // List divers in order of addition
             event.divers.forEach(diver => {
+                const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
                 const div = document.createElement('div');
                 div.className = 'diver-row';
                 div.innerHTML = `
                     <div class="row align-items-center">
                         <div class="col-md-2">${diver.name}</div>
                         <div class="col-md-1">
-                            <input type="number" class="form-control bottle-size" data-id="${diver.id}" value="${diver.bottleSize || ''}" placeholder="Pullon koko (L)" ${diver.diveStarted ? 'disabled' : ''} required>
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openBottleSizeModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä pullon koko'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            <input type="number" class="form-control pressure" data-id="${diver.id}" value="${diver.pressure || ''}" placeholder="Paine (bar)" ${diver.diveStarted ? 'disabled' : ''}>
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPressureModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : 'Syötä paine'}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            <input type="number" class="form-control planned-time" data-id="${diver.id}" value="${diver.plannedTime || ''}" placeholder="Aika (min)" ${diver.diveStarted ? 'disabled' : ''} required>
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openGasModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä kaasu'}</span>` : `<span>${diver.gas || ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            <input type="number" class="form-control planned-depth" data-id="${diver.id}" value="${diver.plannedDepth || ''}" placeholder="Syvyys (m)" ${diver.diveStarted ? 'disabled' : ''} required>
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPlannedTimeModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä aika'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            ${diver.diveStarted ? `
-                                <span>${diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria'}</span>
-                            ` : `
-                                <div class="buddy-checkboxes">
-                                    ${event.divers.map(d => d.id !== diver.id ? `
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input buddy-checkbox" data-id="${diver.id}" data-buddy-id="${d.id}" ${diver.buddies.includes(d.id) ? 'checked' : ''}>
-                                            <label class="form-check-label">${d.name}</label>
-                                        </div>
-                                    ` : '').join('')}
-                                </div>
-                            `}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPlannedDepthModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä syvyys'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
+                        </div>
+                        <div class="col-md-1">
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
                         </div>
                         <div class="col-md-2">
-                            ${diver.diveStarted && !diver.diveEnded ? `
-                                <span class="notes-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
-                            ` : `
-                                <input type="text" class="form-control notes" data-id="${diver.id}" value="${diver.notes || ''}" placeholder="Muistiinpanot">
-                            `}
+                            <span class="input-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             ${diver.diveStarted || diver.diveEnded ? `
                                 <span class="dive-time ${diver.timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${diver.timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">${formatTime(diver.diveTime)}</span>
                                 ${diver.airConsumption ? `<span>, Kaasun kulutus: ${diver.airConsumption} L</span>` : ''}
                             ` : ''}
                         </div>
                         <div class="col-md-1">
-                            ${diver.diveStarted && !diver.diveEnded ? `
-                                <span>(${formatTime(diver.timeLeft * 60)})</span>
-                            ` : ''}
+                            ${diver.diveStarted && !diver.diveEnded ? `<span>(${formatTime(diver.timeLeft * 60)})</span>` : ''}
                         </div>
                         <div class="col-md-1">
-                            ${diver.diveEnded ? `
-                                <span class="final-pressure-span" onclick="openFinalPressureModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä paine'}</span>
-                            ` : ''}
+                            ${diver.diveEnded ? `<span class="input-span" onclick="openFinalPressureModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä paine'}</span>` : ''}
                         </div>
                         <div class="col-md-1">
                             ${diver.diveStarted && !diver.diveEnded ? `
@@ -460,7 +724,7 @@
 
         // Check if diver is ready to start (required fields filled)
         function isDiverReady(diver) {
-            return diver.bottleSize && diver.plannedTime && diver.plannedDepth;
+            return diver.bottleSize && diver.plannedTime && diver.plannedDepth && diver.gas;
         }
 
         // Add diver
@@ -473,6 +737,7 @@
                 name: document.getElementById('diverName').value,
                 bottleSize: '',
                 pressure: '',
+                gas: '',
                 plannedTime: '',
                 plannedDepth: '',
                 buddies: [],
@@ -488,38 +753,6 @@
             event.divers.push(diver);
             localStorage.setItem('diveEvents', JSON.stringify(events));
             showEventView();
-        });
-
-        // Update diver details
-        document.addEventListener('change', function(e) {
-            const event = events.find(e => e.id === currentEventId);
-            const diverId = e.target.dataset.id;
-            const diver = event.divers.find(d => d.id === diverId);
-            if (!diver) return;
-
-            if (e.target.classList.contains('bottle-size')) {
-                diver.bottleSize = e.target.value;
-            } else if (e.target.classList.contains('pressure')) {
-                diver.pressure = e.target.value;
-            } else if (e.target.classList.contains('planned-time')) {
-                diver.plannedTime = e.target.value;
-                diver.timeLeft = parseInt(e.target.value);
-            } else if (e.target.classList.contains('planned-depth')) {
-                diver.plannedDepth = e.target.value;
-            } else if (e.target.classList.contains('buddy-checkbox')) {
-                const buddyId = e.target.dataset.buddyId;
-                if (e.target.checked) {
-                    if (!diver.buddies.includes(buddyId)) {
-                        diver.buddies.push(buddyId);
-                    }
-                } else {
-                    diver.buddies = diver.buddies.filter(id => id !== buddyId);
-                }
-            } else if (e.target.classList.contains('notes')) {
-                diver.notes = e.target.value;
-            }
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            loadEventDetails();
         });
 
         // Start dive
@@ -574,8 +807,6 @@
                 diver.paused = false;
                 localStorage.setItem('diveEvents', JSON.stringify(events));
                 loadEventDetails();
-                // Open final pressure modal immediately after stopping dive
-                openFinalPressureModal(diverId);
             }
         }
 
@@ -600,9 +831,8 @@
             console.log('Generating PDF for event:', currentEventId);
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait' });
-            const event = events.find(e => e.id === currentEventId);
             const pageWidth = doc.internal.pageSize.getWidth();
-            const maxLineWidth = pageWidth - 20; // 10mm margin on each side
+            const maxLineWidth = pageWidth - 30; // 15mm margin for indented lines
 
             // Header
             doc.setFontSize(16);
@@ -614,12 +844,22 @@
 
             // Diver details
             let y = 50;
+            const event = events.find(e => e.id === currentEventId);
             event.divers.forEach(diver => {
                 const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                const diverText = `- ${diver.name}: Sukellusaika: ${formatTime(diver.diveTime)}${diver.airConsumption ? `, Kaasun kulutus: ${diver.airConsumption} L` : ''}, Syvyys: ${diver.plannedDepth} m, Parit: ${buddyNames}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
-                const lines = doc.splitTextToSize(diverText, maxLineWidth);
-                doc.text(lines, 10, y);
-                y += lines.length * 7; // Adjust line height (7mm per line)
+                // Diver name
+                doc.text(`${diver.name}`, 10, y);
+                y += 7;
+                // Planned details (indented)
+                const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
+                const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
+                doc.text(plannedLines, 15, y); // Indented by 15mm
+                y += plannedLines.length * 7;
+                // Actual details (indented)
+                const actualText = `Toteutunut aika: ${formatTime(diver.diveTime)}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Käytetty kaasu: ${diver.airConsumption || '-'} L, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
+                const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
+                doc.text(actualLines, 15, y); // Indented by 15mm
+                y += actualLines.length * 7;
                 if (y > 270) { // Add new page if near bottom (A4 height is 297mm)
                     doc.addPage();
                     y = 10;
