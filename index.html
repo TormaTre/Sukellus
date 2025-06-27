@@ -15,7 +15,7 @@
         .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
             cursor: pointer;
             margin-left: 10px;
-            font-size: 2em; /* Doubled size for action buttons */
+            font-size: 4em; /* Doubled again from 2em to 4em for action buttons */
         }
         .event-header { margin-bottom: 20px; }
         .font-weight-bold { font-weight: bold; }
@@ -561,22 +561,37 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Generate PDF
+        // Generate PDF in portrait mode
         function generatePdf() {
             console.log('Generating PDF for event:', currentEventId);
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: 'portrait' }); // Set to portrait mode
             const event = events.find(e => e.id === currentEventId);
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const maxLineWidth = pageWidth - 20; // 10mm margin on each side
+
+            // Header
+            doc.setFontSize(16);
             doc.text(`Sukelluspäiväkirja: ${event.location}`, 10, 10);
+            doc.setFontSize(12);
             doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
             doc.text(`Päivämäärä: ${event.date}`, 10, 30);
             doc.text('Sukeltajat:', 10, 40);
+
+            // Diver details
             let y = 50;
             event.divers.forEach(diver => {
                 const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                doc.text(`- ${diver.name}: Sukellusaika: ${formatTime(diver.diveTime)}${diver.airConsumption ? `, Kaasun kulutus: ${diver.airConsumption} L` : ''}, Syvyys: ${diver.plannedDepth} m, Parit: ${buddyNames}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`, 10, y);
-                y += 10;
+                const diverText = `- ${diver.name}: Sukellusaika: ${formatTime(diver.diveTime)}${diver.airConsumption ? `, Kaasun kulutus: ${diver.airConsumption} L` : ''}, Syvyys: ${diver.plannedDepth} m, Parit: ${buddyNames}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
+                const lines = doc.splitTextToSize(diverText, maxLineWidth);
+                doc.text(lines, 10, y);
+                y += lines.length * 7; // Adjust line height (7mm per line)
+                if (y > 270) { // Add new page if near bottom (A4 height is 297mm)
+                    doc.addPage();
+                    y = 10;
+                }
             });
+
             doc.save(`${event.location}_Sukelluspäiväkirja.pdf`);
         }
 
