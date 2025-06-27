@@ -15,7 +15,7 @@
         .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
             cursor: pointer;
             margin-left: 10px;
-            font-size: 2em; /* Reverted to 2em for action buttons */
+            font-size: 2em; /* Action buttons at 2em */
         }
         .event-header { margin-bottom: 20px; }
         .font-weight-bold { font-weight: bold; }
@@ -377,91 +377,80 @@
             `;
             diverList.appendChild(headerDiv);
 
-            // Group divers by buddy pairs (optional, kept for visual grouping)
-            const groupedDivers = {};
+            // List divers in order of addition (no buddy grouping)
             event.divers.forEach(diver => {
-                const buddyId = diver.buddies.length > 0 ? diver.buddies[0] : diver.id;
-                if (!groupedDivers[buddyId]) {
-                    groupedDivers[buddyId] = [];
-                }
-                groupedDivers[buddyId].push(diver);
-            });
-
-            Object.values(groupedDivers).forEach(group => {
-                group.forEach(diver => {
-                    const div = document.createElement('div');
-                    div.className = 'diver-row';
-                    div.innerHTML = `
-                        <div class="row align-items-center">
-                            <div class="col-md-2">${diver.name}</div>
-                            <div class="col-md-1">
-                                <input type="number" class="form-control bottle-size" data-id="${diver.id}" value="${diver.bottleSize || ''}" placeholder="Pullon koko (L)" ${diver.diveStarted ? 'disabled' : ''} required>
-                            </div>
-                            <div class="col-md-1">
-                                <input type="number" class="form-control pressure" data-id="${diver.id}" value="${diver.pressure || ''}" placeholder="Paine (bar)" ${diver.diveStarted ? 'disabled' : ''}>
-                            </div>
-                            <div class="col-md-1">
-                                <input type="number" class="form-control planned-time" data-id="${diver.id}" value="${diver.plannedTime || ''}" placeholder="Aika (min)" ${diver.diveStarted ? 'disabled' : ''} required>
-                            </div>
-                            <div class="col-md-1">
-                                <input type="number" class="form-control planned-depth" data-id="${diver.id}" value="${diver.plannedDepth || ''}" placeholder="Syvyys (m)" ${diver.diveStarted ? 'disabled' : ''} required>
-                            </div>
-                            <div class="col-md-1">
-                                ${diver.diveStarted ? `
-                                    <span>${diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria'}</span>
+                const div = document.createElement('div');
+                div.className = 'diver-row';
+                div.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-2">${diver.name}</div>
+                        <div class="col-md-1">
+                            <input type="number" class="form-control bottle-size" data-id="${diver.id}" value="${diver.bottleSize || ''}" placeholder="Pullon koko (L)" ${diver.diveStarted ? 'disabled' : ''} required>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" class="form-control pressure" data-id="${diver.id}" value="${diver.pressure || ''}" placeholder="Paine (bar)" ${diver.diveStarted ? 'disabled' : ''}>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" class="form-control planned-time" data-id="${diver.id}" value="${diver.plannedTime || ''}" placeholder="Aika (min)" ${diver.diveStarted ? 'disabled' : ''} required>
+                        </div>
+                        <div class="col-md-1">
+                            <input type="number" class="form-control planned-depth" data-id="${diver.id}" value="${diver.plannedDepth || ''}" placeholder="Syvyys (m)" ${diver.diveStarted ? 'disabled' : ''} required>
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveStarted ? `
+                                <span>${diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria'}</span>
+                            ` : `
+                                <div class="buddy-checkboxes">
+                                    ${event.divers.map(d => d.id !== diver.id ? `
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input buddy-checkbox" data-id="${diver.id}" data-buddy-id="${d.id}" ${diver.buddies.includes(d.id) ? 'checked' : ''}>
+                                            <label class="form-check-label">${d.name}</label>
+                                        </div>
+                                    ` : '').join('')}
+                                </div>
+                            `}
+                        </div>
+                        <div class="col-md-2">
+                            ${diver.diveStarted && !diver.diveEnded ? `
+                                <span class="notes-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
+                            ` : `
+                                <input type="text" class="form-control notes" data-id="${diver.id}" value="${diver.notes || ''}" placeholder="Muistiinpanot">
+                            `}
+                        </div>
+                        <div class="col-md-2">
+                            ${diver.diveStarted || diver.diveEnded ? `
+                                <span class="dive-time ${diver.timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${diver.timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">${formatTime(diver.diveTime)}</span>
+                                ${diver.airConsumption ? `<span>, Kaasun kulutus: ${diver.airConsumption} L</span>` : ''}
+                            ` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveStarted && !diver.diveEnded ? `
+                                <span>(${formatTime(diver.timeLeft * 60)})</span>
+                            ` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveEnded ? `
+                                <span class="final-pressure-span" onclick="openFinalPressureModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä paine'}</span>
+                            ` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveStarted && !diver.diveEnded ? `
+                                ${diver.paused ? `
+                                    <span class="resume-icon" onclick="resumeDive('${diver.id}')">▶️</span>
+                                    <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
                                 ` : `
-                                    <div class="buddy-checkboxes">
-                                        ${event.divers.map(d => d.id !== diver.id ? `
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input buddy-checkbox" data-id="${diver.id}" data-buddy-id="${d.id}" ${diver.buddies.includes(d.id) ? 'checked' : ''}>
-                                                <label class="form-check-label">${d.name}</label>
-                                            </div>
-                                        ` : '').join('')}
-                                    </div>
+                                    <span class="pause-icon" onclick="pauseDive('${diver.id}')">⏸️</span>
+                                    <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
                                 `}
-                            </div>
-                            <div class="col-md-2">
-                                ${diver.diveStarted && !diver.diveEnded ? `
-                                    <span class="notes-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
-                                ` : `
-                                    <input type="text" class="form-control notes" data-id="${diver.id}" value="${diver.notes || ''}" placeholder="Muistiinpanot">
-                                `}
-                            </div>
-                            <div class="col-md-2">
-                                ${diver.diveStarted || diver.diveEnded ? `
-                                    <span class="dive-time ${diver.timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${diver.timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">${formatTime(diver.diveTime)}</span>
-                                    ${diver.airConsumption ? `<span>, Kaasun kulutus: ${diver.airConsumption} L</span>` : ''}
-                                ` : ''}
-                            </div>
-                            <div class="col-md-1">
-                                ${diver.diveStarted && !diver.diveEnded ? `
-                                    <span>(${formatTime(diver.timeLeft * 60)})</span>
-                                ` : ''}
-                            </div>
-                            <div class="col-md-1">
-                                ${diver.diveEnded ? `
-                                    <span class="final-pressure-span" onclick="openFinalPressureModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä paine'}</span>
-                                ` : ''}
-                            </div>
-                            <div class="col-md-1">
-                                ${diver.diveStarted && !diver.diveEnded ? `
-                                    ${diver.paused ? `
-                                        <span class="resume-icon" onclick="resumeDive('${diver.id}')">▶️</span>
-                                        <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
-                                    ` : `
-                                        <span class="pause-icon" onclick="pauseDive('${diver.id}')">⏸️</span>
-                                        <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
-                                    `}
-                                ` : diver.diveEnded ? `
-                                    <span>Pinnalla</span>
-                                ` : `
-                                    ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')">▶️</span>` : ''}
-                                    <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')">🗑️</span>
-                                `}
-                            </div>
-                        </div>`;
-                    diverList.appendChild(div);
-                });
+                            ` : diver.diveEnded ? `
+                                <span>Pinnalla</span>
+                            ` : `
+                                ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')">▶️</span>` : ''}
+                                <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')">🗑️</span>
+                            `}
+                        </div>
+                    </div>`;
+                diverList.appendChild(div);
             });
 
             // Show/hide end event and PDF buttons
