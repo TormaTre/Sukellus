@@ -71,6 +71,14 @@
         .buddy-checkboxes { max-height: 100px; overflow-y: auto; }
         #mixedGasInput { display: none; }
         #themeToggleContainer { margin-top: 20px; }
+        .required-label::after {
+            content: ' *';
+            color: red;
+        }
+        .required-note {
+            font-size: 0.9em;
+            color: red;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -134,39 +142,36 @@
         </form>
     </div>
 
-    <!-- Bottle Size Modal -->
-    <div class="modal fade" id="bottleSizeModal" tabindex="-1" aria-labelledby="bottleSizeModalLabel" aria-hidden="true">
+    <!-- Diver Details Modal -->
+    <div class="modal fade" id="diverDetailsModal" tabindex="-1" aria-labelledby="diverDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bottleSizeModalLabel">Syötä Pullon Koko</h5>
+                    <h5 class="modal-title" id="diverDetailsModalLabel">Syötä Sukeltajan Tiedot</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
+                    <div class="mb-3">
+                        <label for="bottleSizeInput" class="form-label">Pullon koko (L)</label>
+                        <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="pressureInput" class="form-label">Paine (bar)</label>
+                        <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedDepthInput" class="form-label required-label">Suunniteltu syvyys (m)</label>
+                        <input type="number" class="form-control" id="plannedDepthInput" placeholder="Suunniteltu syvyys (m)" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedTimeInput" class="form-label required-label">Suunniteltu aika (min)</label>
+                        <input type="number" class="form-control" id="plannedTimeInput" placeholder="Suunniteltu aika (min)" min="0" required>
+                    </div>
+                    <div class="required-note">* Pakollinen</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="saveBottleSize()">Tallenna</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pressure Modal -->
-    <div class="modal fade" id="pressureModal" tabindex="-1" aria-labelledby="pressureModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pressureModalLabel">Syötä Paine</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="savePressure()">Tallenna</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDiverDetails()">Tallenna</button>
                 </div>
             </div>
         </div>
@@ -194,44 +199,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
                     <button type="button" class="btn btn-primary" onclick="saveGas()">Tallenna</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Planned Time Modal -->
-    <div class="modal fade" id="plannedTimeModal" tabindex="-1" aria-labelledby="plannedTimeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="plannedTimeModalLabel">Syötä Suunniteltu Aika</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="number" class="form-control" id="plannedTimeInput" placeholder="Aika (min)" min="0">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="savePlannedTime()">Tallenna</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Planned Depth Modal -->
-    <div class="modal fade" id="plannedDepthModal" tabindex="-1" aria-labelledby="plannedDepthModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="plannedDepthModalLabel">Syötä Suunniteltu Syvyys</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="number" class="form-control" id="plannedDepthInput" placeholder="Syvyys (m)" min="0">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="savePlannedDepth()">Tallenna</button>
                 </div>
             </div>
         </div>
@@ -479,48 +446,32 @@
             }
         }
 
-        // Open bottle size modal
-        function openBottleSizeModal(diverId) {
-            console.log('Opening bottle size modal for diver:', diverId);
+        // Open diver details modal
+        function openDiverDetailsModal(diverId) {
+            console.log('Opening diver details modal for diver:', diverId);
             currentDiverId = diverId;
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === diverId);
             document.getElementById('bottleSizeInput').value = diver.bottleSize || '';
-            const modal = new bootstrap.Modal(document.getElementById('bottleSizeModal'));
+            document.getElementById('pressureInput').value = diver.pressure || '';
+            document.getElementById('plannedDepthInput').value = diver.plannedDepth || '';
+            document.getElementById('plannedTimeInput').value = diver.plannedTime || '';
+            const modal = new bootstrap.Modal(document.getElementById('diverDetailsModal'));
             modal.show();
         }
 
-        // Save bottle size
-        function saveBottleSize() {
-            console.log('Saving bottle size for diver:', currentDiverId);
+        // Save diver details
+        function saveDiverDetails() {
+            console.log('Saving diver details for diver:', currentDiverId);
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === currentDiverId);
             diver.bottleSize = document.getElementById('bottleSizeInput').value;
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('bottleSizeModal'));
-            modal.hide();
-            loadEventDetails();
-        }
-
-        // Open pressure modal
-        function openPressureModal(diverId) {
-            console.log('Opening pressure modal for diver:', diverId);
-            currentDiverId = diverId;
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            document.getElementById('pressureInput').value = diver.pressure || '';
-            const modal = new bootstrap.Modal(document.getElementById('pressureModal'));
-            modal.show();
-        }
-
-        // Save pressure
-        function savePressure() {
-            console.log('Saving pressure for diver:', currentDiverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
             diver.pressure = document.getElementById('pressureInput').value;
+            diver.plannedDepth = document.getElementById('plannedDepthInput').value;
+            diver.plannedTime = document.getElementById('plannedTimeInput').value;
+            diver.timeLeft = parseInt(diver.plannedTime) || 0;
             localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('pressureModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('diverDetailsModal'));
             modal.hide();
             loadEventDetails();
         }
@@ -559,53 +510,6 @@
             loadEventDetails();
         }
 
-        // Open planned time modal
-        function openPlannedTimeModal(diverId) {
-            console.log('Opening planned time modal for diver:', diverId);
-            currentDiverId = diverId;
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            document.getElementById('plannedTimeInput').value = diver.plannedTime || '';
-            const modal = new bootstrap.Modal(document.getElementById('plannedTimeModal'));
-            modal.show();
-        }
-
-        // Save planned time
-        function savePlannedTime() {
-            console.log('Saving planned time for diver:', currentDiverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
-            diver.plannedTime = document.getElementById('plannedTimeInput').value;
-            diver.timeLeft = parseInt(diver.plannedTime);
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('plannedTimeModal'));
-            modal.hide();
-            loadEventDetails();
-        }
-
-        // Open planned depth modal
-        function openPlannedDepthModal(diverId) {
-            console.log('Opening planned depth modal for diver:', diverId);
-            currentDiverId = diverId;
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            document.getElementById('plannedDepthInput').value = diver.plannedDepth || '';
-            const modal = new bootstrap.Modal(document.getElementById('plannedDepthModal'));
-            modal.show();
-        }
-
-        // Save planned depth
-        function savePlannedDepth() {
-            console.log('Saving planned depth for diver:', currentDiverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
-            diver.plannedDepth = document.getElementById('plannedDepthInput').value;
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('plannedDepthModal'));
-            modal.hide();
-            loadEventDetails();
-        }
-
         // Open buddy modal
         function openBuddyModal(diverId) {
             console.log('Opening buddy modal for diver:', diverId);
@@ -619,7 +523,9 @@
                     <label class="form-check-label">${d.name}</label>
                 </div>
             ` : '').join('');
-            const modal = new bootstrap.Modal(document.getElementById('buddyModal'));
+            const modal = new bootstrap.Modal(document.getElementById
+
+('buddyModal'));
             modal.show();
         }
 
@@ -733,19 +639,19 @@
                     <div class="row align-items-center">
                         <div class="col-md-2">${diver.name}</div>
                         <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openBottleSizeModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä pullon koko'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä tiedot'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPressureModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : 'Syötä paine'}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : ''}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openGasModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä kaasu'}</span>` : `<span>${diver.gas || ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPlannedTimeModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä aika'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openPlannedDepthModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä syvyys'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
@@ -790,9 +696,9 @@
             document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
         }
 
-        // Check if diver is ready to start (required fields filled)
+        // Check if diver is ready to start (only plannedTime and plannedDepth are required)
         function isDiverReady(diver) {
-            return diver.bottleSize && diver.plannedTime && diver.plannedDepth && diver.gas;
+            return diver.plannedTime && diver.plannedDepth && diver.gas;
         }
 
         // Add diver
@@ -869,8 +775,6 @@
             const diver = event.divers.find(d => d.id === diverId);
             if (confirm(`Haluatko varmasti päättää sukelluksen sukeltajalle ${diver.name}?`)) {
                 console.log('Stopping dive for diver:', diverId);
-
-
                 clearInterval(timers[diverId]);
                 delete timers[diverId];
                 diver.diveEnded = true;
