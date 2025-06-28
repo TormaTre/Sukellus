@@ -508,20 +508,47 @@
             modal.show();
         }
 
-        // Save buddies
-        function saveBuddies() {
-            console.log('Saving buddies for diver:', currentDiverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
-            const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
-            diver.buddies = Array.from(checkboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.dataset.buddyId);
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
-            modal.hide();
-            loadEventDetails();
+   // Save buddies
+    function saveBuddies() {
+        console.log('Saving buddies for diver:', currentDiverId);
+        const event = events.find(e => e.id === currentEventId);
+        const diver = event.divers.find(d => d.id === currentDiverId);
+    
+        // Get selected buddy IDs
+        const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
+        const newBuddies = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.dataset.buddyId);
+    
+    // Update current diver's buddies
+        diver.buddies = newBuddies;
+    
+    // Update buddies' buddy lists to include current diver (mutual pairing)
+        event.divers.forEach(d => {
+            if (d.id !== currentDiverId) {
+                if (newBuddies.includes(d.id)) {
+                // Add current diver to this diver's buddies if not already present
+                    if (!d.buddies.includes(currentDiverId)) {
+                        d.buddies.push(currentDiverId);
+                        console.log(`Added ${diver.name} to ${d.name}'s buddies`);
+                }
+            } else {
+                // Remove current diver from this diver's buddies if not selected
+                d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
+                console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
+            }
         }
+    });
+    
+    localStorage.setItem('diveEvents', JSON.stringify(events));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
+    modal.hide();
+    loadEventDetails();
+}
+
+
+
+
 
         // Open notes modal
         function openNotesModal(diverId) {
