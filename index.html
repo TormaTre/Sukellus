@@ -167,38 +167,23 @@
                         <label for="plannedTimeInput" class="form-label required-label">Suunniteltu aika (min)</label>
                         <input type="number" class="form-control" id="plannedTimeInput" placeholder="Suunniteltu aika (min)" min="0" required>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label required-label">Kaasu</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasAir" value="Ilma" checked>
+                            <label class="form-check-label" for="gasAir">Ilma</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasMixed" value="Seoskaasu">
+                            <label class="form-check-label" for="gasMixed">Seoskaasu</label>
+                        </div>
+                        <input type="text" class="form-control mt-2" id="mixedGasInput" placeholder="Syötä seoskaasu (esim. Nitrox 32%)">
+                    </div>
                     <div class="required-note">* Pakollinen</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
                     <button type="button" class="btn btn-primary" onclick="saveDiverDetails()">Tallenna</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gas Modal -->
-    <div class="modal fade" id="gasModal" tabindex="-1" aria-labelledby="gasModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="gasModalLabel">Valitse Kaasu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="gasType" id="gasAir" value="Ilma" checked>
-                        <label class="form-check-label" for="gasAir">Ilma</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="gasType" id="gasMixed" value="Seoskaasu">
-                        <label class="form-check-label" for="gasMixed">Seoskaasu</label>
-                    </div>
-                    <input type="text" class="form-control mt-2" id="mixedGasInput" placeholder="Syötä seoskaasu (esim. Nitrox 32%)">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="saveGas()">Tallenna</button>
                 </div>
             </div>
         </div>
@@ -456,9 +441,20 @@
             document.getElementById('pressureInput').value = diver.pressure || '';
             document.getElementById('plannedDepthInput').value = diver.plannedDepth || '';
             document.getElementById('plannedTimeInput').value = diver.plannedTime || '';
+            document.getElementById('gasAir').checked = diver.gas === 'Ilma' || !diver.gas;
+            document.getElementById('gasMixed').checked = diver.gas && diver.gas !== 'Ilma';
+            document.getElementById('mixedGasInput').value = diver.gas && diver.gas !== 'Ilma' ? diver.gas : '';
+            document.getElementById('mixedGasInput').style.display = document.getElementById('gasMixed').checked ? 'block' : 'none';
             const modal = new bootstrap.Modal(document.getElementById('diverDetailsModal'));
             modal.show();
         }
+
+        // Toggle mixed gas input visibility
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'gasType') {
+                document.getElementById('mixedGasInput').style.display = e.target.value === 'Seoskaasu' ? 'block' : 'none';
+            }
+        });
 
         // Save diver details
         function saveDiverDetails() {
@@ -470,42 +466,10 @@
             diver.plannedDepth = document.getElementById('plannedDepthInput').value;
             diver.plannedTime = document.getElementById('plannedTimeInput').value;
             diver.timeLeft = parseInt(diver.plannedTime) || 0;
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('diverDetailsModal'));
-            modal.hide();
-            loadEventDetails();
-        }
-
-        // Open gas modal
-        function openGasModal(diverId) {
-            console.log('Opening gas modal for diver:', diverId);
-            currentDiverId = diverId;
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            document.getElementById('gasAir').checked = diver.gas === 'Ilma' || !diver.gas;
-            document.getElementById('gasMixed').checked = diver.gas && diver.gas !== 'Ilma';
-            document.getElementById('mixedGasInput').value = diver.gas && diver.gas !== 'Ilma' ? diver.gas : '';
-            document.getElementById('mixedGasInput').style.display = document.getElementById('gasMixed').checked ? 'block' : 'none';
-            const modal = new bootstrap.Modal(document.getElementById('gasModal'));
-            modal.show();
-        }
-
-        // Toggle mixed gas input visibility
-        document.addEventListener('change', function(e) {
-            if (e.target.name === 'gasType') {
-                document.getElementById('mixedGasInput').style.display = e.target.value === 'Seoskaasu' ? 'block' : 'none';
-            }
-        });
-
-        // Save gas
-        function saveGas() {
-            console.log('Saving gas for diver:', currentDiverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
             const gasType = document.querySelector('input[name="gasType"]:checked').value;
             diver.gas = gasType === 'Ilma' ? 'Ilma' : document.getElementById('mixedGasInput').value || 'Seoskaasu';
             localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('gasModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('diverDetailsModal'));
             modal.hide();
             loadEventDetails();
         }
@@ -523,9 +487,7 @@
                     <label class="form-check-label">${d.name}</label>
                 </div>
             ` : '').join('');
-            const modal = new bootstrap.Modal(document.getElementById
-
-('buddyModal'));
+            const modal = new bootstrap.Modal(document.getElementById('buddyModal'));
             modal.show();
         }
 
@@ -645,7 +607,7 @@
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : ''}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
                         </div>
                         <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openGasModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä kaasu'}</span>` : `<span>${diver.gas || ''}</span>`}
+                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä tiedot'}</span>` : `<span>${diver.gas || ''}</span>`}
                         </div>
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
@@ -696,7 +658,7 @@
             document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
         }
 
-        // Check if diver is ready to start (only plannedTime and plannedDepth are required)
+        // Check if diver is ready to start (only plannedTime, plannedDepth, and gas are required)
         function isDiverReady(diver) {
             return diver.plannedTime && diver.plannedDepth && diver.gas;
         }
