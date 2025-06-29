@@ -105,6 +105,16 @@
             font-size: 1.5em; /* 1.5x larger font for diver name */
             font-weight: bold;
         }
+        .small-btn {
+            font-size: 0.8em; /* 0.8x smaller font for backup/restore buttons */
+        }
+        .bottom-buttons {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px; /* Space between buttons */
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -112,10 +122,6 @@
     <div id="mainView" class="container" style="position: relative;">
         <h1>Sukelluspöytäkirja</h1>
         <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
-        <button class="btn btn-info mb-3" onclick="backupEvents()">Varmuuskopioi</button>
-        <label class="btn btn-secondary mb-3">
-            Palauta <input type="file" id="restoreInput" accept=".json" onchange="restoreEvents(event)" style="display: none;">
-        </label>
         <h3>Aiemmat Tapahtumat</h3>
         <ul id="eventList" class="list-group"></ul>
         <div id="themeToggleContainer">
@@ -123,6 +129,12 @@
                 <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
+        </div>
+        <div class="bottom-buttons">
+            <button class="btn btn-info small-btn" onclick="backupEvents()">Varmuuskopioi</button>
+            <label class="btn btn-secondary small-btn">
+                Palauta <input type="file" id="restoreInput" accept=".json" onchange="restoreEvents(event)" style="display: none;">
+            </label>
         </div>
         <div class="version-text">Versio 0.5 Lassi Hakala 2025</div>
     </div>
@@ -645,7 +657,6 @@
                 <div class="col-md-1">Sukellusaika</div>
                 <div class="col-md-1">Jäljellä oleva aika</div>
                 
-               
             `;
             diverList.appendChild(headerDiv);
 
