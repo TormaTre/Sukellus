@@ -82,7 +82,7 @@
         .surface-text {
             color: #28a745; /* Same green as dive-time */
             font-weight: bold;
-            font-size: 2em; /* 1.5x larger than action buttons */
+            font-size: 3em; /* 1.5x larger than action buttons */
         }
         hr.diver-divider {
             margin: 10px 0;
@@ -105,7 +105,7 @@
 </head>
 <body data-theme="dark">
     <!-- Main View -->
-    <div id="mainView" class="container">
+    <div id="mainView" class="container" style="position: relative;">
         <h1>Sukelluspöytäkirja</h1>
         <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
         <button class="btn btn-info mb-3" onclick="backupEvents()">Varmuuskopioi</button>
@@ -120,6 +120,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
+        <div class="version-text">Versio 0.5 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
