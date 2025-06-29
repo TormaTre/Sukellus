@@ -70,7 +70,6 @@
         .input-span { cursor: pointer; text-decoration: underline; }
         .buddy-checkboxes { max-height: 100px; overflow-y: auto; }
         #mixedGasInput { display: none; }
-        #themeToggleContainer { margin-top: 20px; }
         .required-label::after {
             content: ' *';
             color: red;
@@ -113,7 +112,11 @@
             bottom: 10px;
             left: 10px;
             display: flex;
-            gap: 10px; /* Space between buttons */
+            align-items: center; /* Vertically center buttons and toggle */
+            gap: 10px; /* Space between buttons and toggle */
+        }
+        .form-check.form-switch {
+            margin-bottom: 0; /* Remove default margin for alignment */
         }
     </style>
 </head>
@@ -123,18 +126,16 @@
         <h1>Sukelluspöytäkirja</h1>
         <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
         <h3>Aiemmat Tapahtumat</h3>
-        <ul id="eventList" class="list-group"></ul>
-        <div id="themeToggleContainer">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
-                <label class="form-check-label" for="themeToggle">Tumma tila</label>
-            </div>
-        </div>
+        <ul id="eventList" class="list-group mb-5"></ul>
         <div class="bottom-buttons">
             <button class="btn btn-info small-btn" onclick="backupEvents()">Varmuuskopioi</button>
             <label class="btn btn-secondary small-btn">
                 Palauta <input type="file" id="restoreInput" accept=".json" onchange="restoreEvents(event)" style="display: none;">
             </label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                <label class="form-check-label" for="themeToggle">Tumma tila</label>
+            </div>
         </div>
         <div class="version-text">Versio 0.5 Lassi Hakala 2025</div>
     </div>
@@ -656,7 +657,7 @@
                 <div class="col-md-2">Muistiinpanot</div>
                 <div class="col-md-1">Sukellusaika</div>
                 <div class="col-md-1">Jäljellä oleva aika</div>
-                
+
             `;
             diverList.appendChild(headerDiv);
 
