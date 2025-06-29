@@ -602,7 +602,7 @@
             console.log('Opening final pressure modal for diver:', diverId);
             currentDiverId = diverId;
             const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverStarId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
             document.getElementById('finalPressureInput').value = diver.finalPressure || '';
             const modal = new bootstrap.Modal(document.getElementById('finalPressureModal'));
             modal.show();
