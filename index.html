@@ -602,7 +602,7 @@
             console.log('Opening final pressure modal for diver:', diverId);
             currentDiverId = diverId;
             const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
+            const diver = event.divers.find(d => d.id === diverStarId);
             document.getElementById('finalPressureInput').value = diver.finalPressure || '';
             const modal = new bootstrap.Modal(document.getElementById('finalPressureModal'));
             modal.show();
@@ -758,7 +758,9 @@
                 timeLeft: 0,
                 paused: false,
                 finalPressure: '',
-                airConsumption: ''
+                airConsumption: '',
+                startTime: '',
+                endTime: ''
             };
             event.divers.push(diver);
             localStorage.setItem('diveEvents', JSON.stringify(events));
@@ -778,6 +780,7 @@
             diver.diveStarted = true;
             diver.diveTime = 0;
             diver.timeLeft = parseInt(diver.plannedTime);
+            diver.startTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
             timers[diverId] = setInterval(() => {
                 if (!diver.paused) {
                     diver.diveTime++;
@@ -820,6 +823,7 @@
                 delete timers[diverId];
                 diver.diveEnded = true;
                 diver.paused = false;
+                diver.endTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
                 localStorage.setItem('diveEvents', JSON.stringify(events));
                 loadEventDetails();
             }
@@ -883,7 +887,7 @@
                     doc.text(plannedLines, 15, y); // Indented by 15mm
                     y += plannedLines.length * 7;
                     // Actual details (indented)
-                    const actualText = `Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}, Käytetty kaasu: ${diver.airConsumption || '-'} L`;
+                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}, Käytetty kaasu: ${diver.airConsumption || '-'} L`;
                     const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
                     doc.text(actualLines, 15, y); // Indented by 15mm
                     y += actualLines.length * 7;
