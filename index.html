@@ -81,7 +81,7 @@
         .surface-text {
             color: #28a745; /* Same green as dive-time */
             font-weight: bold;
-            font-size: 2em; /* 1.5x larger than action buttons */
+            font-size: 2em; /* Same size as action buttons */
         }
         hr.diver-divider {
             margin: 10px 0;
@@ -108,9 +108,7 @@
             font-size: 0.8em; /* 0.8x smaller font for backup/restore buttons */
         }
         .bottom-buttons {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
+            margin-top: 20px; /* Space above buttons */
             display: flex;
             align-items: center; /* Vertically center buttons and toggle */
             gap: 10px; /* Space between buttons and toggle */
@@ -126,7 +124,7 @@
         <h1>Sukelluspöytäkirja</h1>
         <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
         <h3>Aiemmat Tapahtumat</h3>
-        <ul id="eventList" class="list-group mb-5"></ul>
+        <ul id="eventList" class="list-group"></ul>
         <div class="bottom-buttons">
             <button class="btn btn-info small-btn" onclick="backupEvents()">Varmuuskopioi</button>
             <label class="btn btn-secondary small-btn">
@@ -643,7 +641,7 @@
             const diverList = document.getElementById('diverList');
             diverList.innerHTML = '';
 
-            // Add header row
+            // Add header row (excluding "Lopullinen paine", "Käytetty kaasu", "Toiminnot")
             const headerDiv = document.createElement('div');
             headerDiv.className = 'row align-items-center font-weight-bold mb-2';
             headerDiv.innerHTML = `
@@ -653,11 +651,10 @@
                 <div class="col-md-1">Kaasu</div>
                 <div class="col-md-1">Suunniteltu aika</div>
                 <div class="col-md-1">Suunniteltu syvyys</div>
-                <div class="col-md-1">Pari</div>
+                <div class="col-md-2">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
                 <div class="col-md-1">Sukellusaika</div>
                 <div class="col-md-1">Jäljellä oleva aika</div>
-
             `;
             diverList.appendChild(headerDiv);
 
@@ -684,7 +681,7 @@
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
                         </div>
                         <div class="col-md-2">
