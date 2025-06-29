@@ -62,7 +62,7 @@
         .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
             cursor: pointer;
             margin-left: 10px;
-            font-size: 2em; /* Action buttons at 2em */
+            font-size: 2em;
         }
         .event-header { margin-bottom: 20px; }
         .font-weight-bold { font-weight: bold; }
@@ -79,42 +79,42 @@
             color: red;
         }
         .surface-text {
-            color: #28a745; /* Same green as dive-time */
+            color: #28a745;
             font-weight: bold;
-            font-size: 2em; /* Same size as action buttons */
+            font-size: 2em;
         }
         hr.diver-divider {
             margin: 10px 0;
-            border-color: #6c757d; /* Matches Bootstrap secondary color */
+            border-color: #6c757d;
         }
         body[data-theme="dark"] hr.diver-divider {
-            border-color: #adb5bd; /* Lighter gray for dark mode */
+            border-color: #adb5bd;
         }
         .version-text {
             position: absolute;
             bottom: 10px;
             right: 10px;
-            font-size: 0.8em; /* Smaller font size for version text */
-            color: #000000; /* Black for light mode */
+            font-size: 0.8em;
+            color: #000000;
         }
         body[data-theme="dark"] .version-text {
-            color: #ffffff; /* White for dark mode */
+            color: #ffffff;
         }
         .diver-name {
-            font-size: 1.5em; /* 1.5x larger font for diver name */
+            font-size: 1.5em;
             font-weight: bold;
         }
         .small-btn {
-            font-size: 0.8em; /* 0.8x smaller font for backup/restore buttons */
+            font-size: 0.8em;
         }
         .bottom-buttons {
-            margin-top: 20px; /* Space above buttons */
+            margin-top: 20px;
             display: flex;
-            align-items: center; /* Vertically center buttons and toggle */
-            gap: 10px; /* Space between buttons and toggle */
+            align-items: center;
+            gap: 10px;
         }
         .form-check.form-switch {
-            margin-bottom: 0; /* Remove default margin for alignment */
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -297,7 +297,7 @@
         // Theme handling
         function loadTheme() {
             console.log('Loading theme');
-            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark mode
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             document.body.setAttribute('data-theme', savedTheme);
             document.getElementById('themeToggle').checked = savedTheme === 'dark';
         }
@@ -307,8 +307,8 @@
             const theme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
             document.body.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
-            loadEvents(); // Refresh event list to apply theme
-            if (currentEventId) loadEventDetails(); // Refresh event view if open
+            loadEvents();
+            if (currentEventId) loadEventDetails();
         }
 
         // Backup events to a JSON file
@@ -541,33 +541,24 @@
             console.log('Saving buddies for diver:', currentDiverId);
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === currentDiverId);
-            
-            // Get selected buddy IDs
             const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
             const newBuddies = Array.from(checkboxes)
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.buddyId);
-            
-            // Update current diver's buddies
             diver.buddies = newBuddies;
-            
-            // Update buddies' buddy lists to include current diver (mutual pairing)
             event.divers.forEach(d => {
                 if (d.id !== currentDiverId) {
                     if (newBuddies.includes(d.id)) {
-                        // Add current diver to this diver's buddies if not already present
                         if (!d.buddies.includes(currentDiverId)) {
                             d.buddies.push(currentDiverId);
                             console.log(`Added ${diver.name} to ${d.name}'s buddies`);
                         }
                     } else {
-                        // Remove current diver from this diver's buddies if not selected
                         d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
                         console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
                     }
                 }
             });
-            
             localStorage.setItem('diveEvents', JSON.stringify(events));
             const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
             modal.hide();
@@ -602,7 +593,7 @@
             console.log('Opening final pressure modal for diver:', diverId);
             currentDiverId = diverId;
             const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === currentDiverId);
+            const diver = event.divers.find(d => d.id === diverId);
             document.getElementById('finalPressureInput').value = diver.finalPressure || '';
             const modal = new bootstrap.Modal(document.getElementById('finalPressureModal'));
             modal.show();
@@ -717,7 +708,6 @@
                         </div>
                     </div>`;
                 diverList.appendChild(div);
-                // Add divider after each diver except the last one
                 if (index < event.divers.length - 1) {
                     const hr = document.createElement('hr');
                     hr.className = 'diver-divider';
@@ -725,12 +715,11 @@
                 }
             });
 
-            // Show/hide end event and PDF buttons
             document.getElementById('endEventBtn').style.display = event.divers.every(d => d.diveEnded) && !event.ended ? 'inline-block' : 'none';
             document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
         }
 
-        // Check if diver is ready to start (only plannedTime, plannedDepth, and gas are required)
+        // Check if diver is ready to start
         function isDiverReady(diver) {
             const ready = diver.plannedTime && diver.plannedDepth && diver.gas;
             console.log('Checking if diver is ready:', diver.id, { plannedTime: diver.plannedTime, plannedDepth: diver.plannedDepth, gas: diver.gas, ready });
@@ -813,7 +802,7 @@
             loadEventDetails();
         }
 
-        // Stop dive with confirmation including diver's name
+        // Stop dive
         function stopDive(diverId) {
             console.log('Stopping dive for diver:', diverId);
             const event = events.find(e => e.id === currentEventId);
@@ -845,7 +834,7 @@
             return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Generate PDF in portrait mode
+        // Generate PDF
         function generatePdf() {
             console.log('Generating PDF for event:', currentEventId);
             try {
@@ -855,14 +844,13 @@
                 }
                 const doc = new jsPDF({ orientation: 'portrait' });
                 const pageWidth = doc.internal.pageSize.getWidth();
-                const maxLineWidth = pageWidth - 30; // 15mm margin for indented lines
+                const maxLineWidth = pageWidth - 30;
 
                 const event = events.find(e => e.id === currentEventId);
                 if (!event) {
                     throw new Error('Event not found for ID: ' + currentEventId);
                 }
 
-                // Header
                 doc.setFontSize(16);
                 doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
                 doc.setFontSize(12);
@@ -870,28 +858,24 @@
                 doc.text(`Päivämäärä: ${event.date}`, 10, 30);
                 doc.text('Sukeltajat:', 10, 40);
 
-                // Diver details
                 let y = 50;
                 event.divers.forEach(diver => {
                     const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                    // Diver name with larger font and bold
-                    doc.setFontSize(18); // 1.5x larger than default 12pt
+                    doc.setFontSize(18);
                     doc.setFont('helvetica', 'bold');
                     doc.text(`${diver.name || 'Nimetön'}`, 10, y);
-                    doc.setFontSize(12); // Reset to default for other text
+                    doc.setFontSize(12);
                     doc.setFont('helvetica', 'normal');
                     y += 7;
-                    // Planned details (indented)
                     const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
                     const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
-                    doc.text(plannedLines, 15, y); // Indented by 15mm
+                    doc.text(plannedLines, 15, y);
                     y += plannedLines.length * 7;
-                    // Actual details (indented)
                     const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}, Käytetty kaasu: ${diver.airConsumption || '-'} L`;
                     const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
-                    doc.text(actualLines, 15, y); // Indented by 15mm
+                    doc.text(actualLines, 15, y);
                     y += actualLines.length * 7;
-                    if (y > 270) { // Add new page if near bottom (A4 height is 297mm)
+                    if (y > 270) {
                         doc.addPage();
                         y = 10;
                     }
