@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sukelluspöytäkirja</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Light mode */
+        body[data-theme="light"] {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Dark mode (default) */
+        body[data-theme="dark"] {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        body[data-theme="dark"] .container,
+        body[data-theme="dark"] .modal-content,
+        body[data-theme="dark"] .list-group-item,
+        body[data-theme="dark"] .form-control,
+        body[data-theme="dark"] .btn-light {
+            background-color: #495057;
+            color: #ffffff;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        body[data-theme="dark"] .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        body[data-theme="dark"] .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        body[data-theme="dark"] .form-control:focus {
+            background-color: #495057;
+            color: #ffffff;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        body[data-theme="dark"] .modal-content {
+            border-color: #6c757d;
+        }
+
+        /* Existing styles */
+        body { padding: 20px; }
+        .dive-time { color: #28a745; font-size: 1.4em; }
+        .dive-time-warning { color: orange; font-size: 1.4em; }
+        .dive-time-over { color: red; font-size: 1.4em; }
+        .diver-row { margin-bottom: 10px; }
+        .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 2em;
+        }
+        .event-header { margin-bottom: 20px; }
+        .font-weight-bold { font-weight: bold; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .input-span { cursor: pointer; text-decoration: underline; }
+        .buddy-checkboxes { max-height: 100px; overflow-y: auto; }
+        #mixedGasInput { display: none; }
+        .required-label::after {
+            content: ' *';
+            color: red;
+        }
+        .required-note {
+            font-size: 0.9em;
+            color: red;
+        }
+        .surface-text {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 2em;
+        }
+        hr.diver-divider {
+            margin: 10px 0;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] hr.diver-divider {
+            border-color: #adb5bd;
+        }
+        .version-text {
+            font-size: 0.8em;
+            color: #000000;
+            margin-top: 10px; /* Space above version text */
+            text-align: center; /* Centered for consistency */
+        }
+        body[data-theme="dark"] .version-text {
+            color: #ffffff;
+        }
+        .diver-name {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .small-btn {
+            font-size: 0.8em;
+        }
+        .bottom-buttons {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-check.form-switch {
+            margin-bottom: 0;
+        }
+
+        /* Responsive styles for small screens */
+        @media (max-width: 767.98px) {
+            /* Hide header row in event view */
+            #diverList .font-weight-bold {
+                display: none;
+            }
+            /* Stack columns vertically */
+            .diver-row .row {
+                flex-direction: column;
+            }
+            .diver-row .col-md-1, .diver-row .col-md-2 {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            /* Increase dive time size (1.5x of 1.4em = 2.1em) */
+            .dive-time, .dive-time-warning, .dive-time-over {
+                font-size: 2.1em;
+            }
+            /* Adjust diver name and icons for better readability */
+            .diver-name {
+                font-size: 1.2em;
+            }
+            .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
+                font-size: 1.5em;
+            }
+            .surface-text {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Main View -->
+    <div id="mainView" class="container">
+        <h1>Sukelluspöytäkirja</h1>
+        <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
+        <h3>Aiemmat Tapahtumat</h3>
+        <ul id="eventList" class="list-group"></ul>
+        <div class="bottom-buttons">
+            <button class="btn btn-info small-btn" onclick="backupEvents()">Varmuuskopioi</button>
+            <label class="btn btn-secondary small-btn">
+                Palauta <input type="file" id="restoreInput" accept=".json" onchange="restoreEvents(event)" style="display: none;">
+            </label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                <label class="form-check-label" for="themeToggle">Tumma tila</label>
+            </div>
+        </div>
+        <div class="version-text">Versio 0.5 Lassi Hakala 2025</div>
+    </div>
+
+    <!-- New Event Form -->
+    <div id="newEventForm" class="container" style="display: none;">
+        <h2>Luo Uusi Tapahtuma</h2>
+        <form id="eventForm">
+            <div class="mb-3">
+                <label for="location" class="form-label">Sijainti</label>
+                <input type="text" class="form-control" id="location" required>
+            </div>
+            <div class="mb-3">
+                <label for="diveMaster" class="form-label">Sukellusvanhin</label>
+                <input type="text" class="form-control" id="diveMaster" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
+            <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
+        </form>
+        <div class="version-text">Versio 0.5 Lassi Hakala 2025</div>
+    </div>
+
+    <!-- Event View -->
+    <div id="eventView" class="container" style="display: none;">
+        <h2 id="eventTitle" class="event-header"></h2>
+        <p><strong>Sukellusvanhin:</strong> <span id="eventDiveMaster"></span></p>
+        <p><strong>Päivämäärä:</strong> <span id="eventDate"></span></p>
+        <button class="btn btn-primary mb-3" onclick="showAddDiverForm()">Lisää Sukeltaja</button>
+        <div id="diverList"></div>
+        <button id="endEventBtn" class="btn btn-success mt-3" style="display: none;" onclick="endEvent()">Lopeta Tapahtuma</button>
+        <button id="generatePdfBtn" class="btn btn-info mt-3" style="display: none;" onclick="generatePdf()">Luo PDF</button>
+        <button class="btn btn-secondary mt-3" onclick="showMainView()">Takaisin Tapahtumiin</button>
+    </div>
+
+    <!-- Add Diver Form -->
+    <div id="addDiverForm" class="container" style="display: none;">
+        <h2>Lisää Sukeltaja</h2>
+        <form id="diverForm">
+            <div class="mb-3">
+                <label for="diverName" class="form-label">Sukeltajan Nimi</label>
+                <input type="text" class="form-control" id="diverName" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Lisää Sukeltaja</button>
+            <button type="button" class="btn btn-secondary" onclick="showEventView()">Peruuta</button>
+        </form>
+    </div>
+
+    <!-- Diver Details Modal -->
+    <div class="modal fade" id="diverDetailsModal" tabindex="-1" aria-labelledby="diverDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="diverDetailsModalLabel">Syötä Sukeltajan Tiedot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bottleSizeInput" class="form-label">Pullon koko (L)</label>
+                        <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="pressureInput" class="form-label">Paine (bar)</label>
+                        <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedDepthInput" class="form-label required-label">Suunniteltu syvyys (m)</label>
+                        <input type="number" class="form-control" id="plannedDepthInput" placeholder="Suunniteltu syvyys (m)" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedTimeInput" class="form-label required-label">Suunniteltu aika (min)</label>
+                        <input type="number" class="form-control" id="plannedTimeInput" placeholder="Suunniteltu aika (min)" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required-label">Kaasu</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasAir" value="Ilma" checked>
+                            <label class="form-check-label" for="gasAir">Ilma</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasMixed" value="Seoskaasu">
+                            <label class="form-check-label" for="gasMixed">Seoskaasu</label>
+                        </div>
+                        <input type="text" class="form-control mt-2" id="mixedGasInput" placeholder="Syötä seoskaasu (esim. Nitrox 32%)">
+                    </div>
+                    <div class="required-note">* Pakollinen</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDiverDetails()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buddy Modal -->
+    <div class="modal fade" id="buddyModal" tabindex="-1" aria-labelledby="buddyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="buddyModalLabel">Valitse Pari</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="buddyCheckboxes" class="buddy-checkboxes"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBuddies()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notesModalLabel">Syötä Muistiinpanot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="notesInput" placeholder="Muistiinpanot">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNotes()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Pressure Modal -->
+    <div class="modal fade" id="finalPressureModal" tabindex="-1" aria-labelledby="finalPressureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="finalPressureModalLabel">Syötä Lopullinen Paine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="number" class="form-control" id="finalPressureInput" placeholder="Lopullinen paine (bar)" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFinalPressure()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let events = JSON.parse(localStorage.getItem('diveEvents')) || [];
+        let currentEventId = null;
+        let timers = {};
+        let currentDiverId = null;
+
+        // Theme handling
+        function loadTheme() {
+            console.log('Loading theme');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        }
+
+        function toggleTheme() {
+            console.log('Toggling theme');
+            const theme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            loadEvents();
+            if (currentEventId) loadEventDetails();
+        }
+
+        // Backup events to a JSON file
+        function backupEvents() {
+            console.log('Backing up events');
+            const data = JSON.stringify(events, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sukelluspöytäkirja_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            console.log('Backup completed');
+        }
+
+        // Restore events from a JSON file
+        function restoreEvents(event) {
+            console.log('Restoring events');
+            const file = event.target.files[0];
+            if (!file) {
+                console.error('No file selected');
+                alert('Valitse JSON-tiedosto palauttaaksesi tapahtumat.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const restoredEvents = JSON.parse(e.target.result);
+                    if (!Array.isArray(restoredEvents)) {
+                        throw new Error('Invalid JSON format: Not an array');
+                    }
+                    for (const evt of restoredEvents) {
+                        if (!evt.id || !evt.location || !evt.diveMaster || !evt.date || !Array.isArray(evt.divers)) {
+                            throw new Error('Invalid event structure');
+                        }
+                    }
+                    events = restoredEvents;
+                    localStorage.setItem('diveEvents', JSON.stringify(events));
+                    loadEvents();
+                    console.log('Events restored successfully');
+                    alert('Tapahtumat palautettu onnistuneesti.');
+                } catch (error) {
+                    console.error('Error restoring events:', error);
+                    alert('Virhe palautettaessa tapahtumia: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show main view
+        function showMainView() {
+            console.log('Showing main view');
+            document.getElementById('mainView').style.display = 'block';
+            document.getElementById('newEventForm').style.display = 'none';
+            document.getElementById('eventView').style.display = 'none';
+            document.getElementById('addDiverForm').style.display = 'none';
+            loadEvents();
+        }
+
+        // Show new event form
+        function showNewEventForm() {
+            console.log('Showing new event form');
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('newEventForm').style.display = 'block';
+            document.getElementById('eventView').style.display = 'none';
+            document.getElementById('addDiverForm').style.display = 'none';
+        }
+
+        // Show event view
+        function showEventView() {
+            console.log('Showing event view for event ID:', currentEventId);
+            document.getElementById('mainView').style.display = 'none';
+            document.getElementById('newEventForm').style.display = 'none';
+            document.getElementById('eventView').style.display = 'block';
+            document.getElementById('addDiverForm').style.display = 'none';
+            loadEventDetails();
+        }
+
+        // Show add diver form
+        function showAddDiverForm() {
+            console.log('Showing add diver form');
+            document.getElementById('eventView').style.display = 'none';
+            document.getElementById('addDiverForm').style.display = 'block';
+        }
+
+        // Load events in main view
+        function loadEvents() {
+            console.log('Loading events:', events);
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
+            events.forEach(event => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `${event.location} - ${event.date} - ${event.diveMaster}
+                    <span>
+                        <button class="btn btn-sm btn-primary" onclick="openEvent('${event.id}')">Avaa</button>
+                        <span class="trash-icon" onclick="confirmDeleteEvent('${event.id}')">🗑️</span>
+                    </span>`;
+                eventList.appendChild(li);
+            });
+        }
+
+        // Confirm event deletion
+        function confirmDeleteEvent(eventId) {
+            console.log('Confirming del
