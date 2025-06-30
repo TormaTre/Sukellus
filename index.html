@@ -93,8 +93,8 @@
         .version-text {
             font-size: 0.8em;
             color: #000000;
-            margin-top: 10px; /* Space above version text */
-            text-align: center; /* Centered for consistency */
+            margin-top: 10px;
+            text-align: center;
         }
         body[data-theme="dark"] .version-text {
             color: #ffffff;
@@ -194,7 +194,7 @@
         <div id="diverList"></div>
         <button id="endEventBtn" class="btn btn-success mt-3" style="display: none;" onclick="endEvent()">Lopeta Tapahtuma</button>
         <button id="generatePdfBtn" class="btn btn-info mt-3" style="display: none;" onclick="generatePdf()">Luo PDF</button>
-        <button class="btn btn-secondary mt-3" onclick="showMainView()">Takaisin Tapahtumiin</button>
+        <button class="btn btn-secondary mt-3" onclick="showMainView()">Takaisin Päänäkymään</button>
     </div>
 
     <!-- Add Diver Form -->
@@ -671,8 +671,9 @@
                 <div class="col-md-1">Kaasu</div>
                 <div class="col-md-1">Suunniteltu aika</div>
                 <div class="col-md-1">Suunniteltu syvyys</div>
-                <div class="col-md-2">Pari</div>
+                <div class="col-md-1">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
+                <div class="col-md-1">Kellonaika</div>
                 <div class="col-md-1">Aika</div>
             `;
             diverList.appendChild(headerDiv);
@@ -700,11 +701,14 @@
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
                         </div>
                         <div class="col-md-2">
                             <span class="input-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveStarted ? `${diver.startTime || ''}${diver.diveEnded ? `<br>${diver.endTime || ''}` : ''}` : ''}
                         </div>
                         <div class="col-md-1">
                             ${diver.diveStarted || diver.diveEnded ? `
