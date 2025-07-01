@@ -6,6 +6,9 @@
     <title>Sukelluspöytäkirja</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Scripts with defer -->
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* Light mode */
         body[data-theme="light"] {
@@ -159,7 +162,7 @@
                 font-size: 1.5em;
             }
             .surface-text {
-                font-size: 2.0em;
+                font-size: 1.0em;
             }
             .clock-time {
                 font-size: 1.0em;
@@ -181,7 +184,7 @@
     <!-- Main View -->
     <div id="mainView" class="container">
         <h1>Sukelluspöytäkirja</h1>
-        <button class="btn btn-primary mb-3" onclick="showNewEventForm()">Uusi Tapahtuma</button>
+        <button class="btn btn-primary mb-3" id="newEventButton">Uusi Tapahtuma</button>
         <h3>Aiemmat Tapahtumat</h3>
         <ul id="eventList" class="list-group"></ul>
         <div class="bottom-buttons">
@@ -194,7 +197,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
-        <div class="version-text">Versio 0.731 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.73 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
@@ -212,7 +215,7 @@
             <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
             <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
         </form>
-        <div class="version-text">Versio 0.731 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.73 Lassi Hakala 2025</div>
     </div>
 
     <!-- Event View -->
@@ -356,8 +359,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         let events = JSON.parse(localStorage.getItem('diveEvents')) || [];
         let currentEventId = null;
@@ -434,54 +435,93 @@
         // Show main view
         function showMainView() {
             console.log('Showing main view');
-            document.getElementById('mainView').style.display = 'block';
-            document.getElementById('newEventForm').style.display = 'none';
-            document.getElementById('eventView').style.display = 'none';
-            document.getElementById('addDiverForm').style.display = 'none';
-            loadEvents();
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'block';
+                newEventForm.style.display = 'none';
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'none';
+                loadEvents();
+            } else {
+                console.error('Main view elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Sovelluksen näkymiä ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Show new event form
         function showNewEventForm() {
             console.log('Showing new event form');
-            document.getElementById('mainView').style.display = 'none';
-            document.getElementById('newEventForm').style.display = 'block';
-            document.getElementById('eventView').style.display = 'none';
-            document.getElementById('addDiverForm').style.display = 'none';
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'none';
+                newEventForm.style.display = 'block';
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'none';
+            } else {
+                console.error('New event form elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Uuden tapahtuman lomaketta ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Show event view
         function showEventView() {
             console.log('Showing event view for event ID:', currentEventId);
-            document.getElementById('mainView').style.display = 'none';
-            document.getElementById('newEventForm').style.display = 'none';
-            document.getElementById('eventView').style.display = 'block';
-            document.getElementById('addDiverForm').style.display = 'none';
-            loadEventDetails();
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'none';
+                newEventForm.style.display = 'none';
+                eventView.style.display = 'block';
+                addDiverForm.style.display = 'none';
+                loadEventDetails();
+            } else {
+                console.error('Event view elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Tapahtumanäkymää ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Show add diver form
         function showAddDiverForm() {
             console.log('Showing add diver form');
-            document.getElementById('eventView').style.display = 'none';
-            document.getElementById('addDiverForm').style.display = 'block';
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (eventView && addDiverForm) {
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'block';
+            } else {
+                console.error('Add diver form elements not found:', { eventView, addDiverForm });
+                alert('Virhe: Sukeltajan lisäyslomaketta ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Load events in main view
         function loadEvents() {
             console.log('Loading events:', events);
             const eventList = document.getElementById('eventList');
-            eventList.innerHTML = '';
-            events.forEach(event => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `${event.location} - ${event.date} - ${event.diveMaster}
-                    <span>
-                        <button class="btn btn-sm btn-primary" onclick="openEvent('${event.id}')">Avaa</button>
-                        <span class="trash-icon" onclick="confirmDeleteEvent('${event.id}')">🗑️</span>
-                    </span>`;
-                eventList.appendChild(li);
-            });
+            if (eventList) {
+                eventList.innerHTML = '';
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `${event.location} - ${event.date} - ${event.diveMaster}
+                        <span>
+                            <button class="btn btn-sm btn-primary" onclick="openEvent('${event.id}')">Avaa</button>
+                            <span class="trash-icon" onclick="confirmDeleteEvent('${event.id}')">🗑️</span>
+                        </span>`;
+                    eventList.appendChild(li);
+                });
+            } else {
+                console.error('Event list element not found');
+                alert('Virhe: Tapahtumalistaa ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Confirm event deletion
@@ -765,126 +805,133 @@
             const event = events.find(e => e.id === currentEventId);
             if (!event) {
                 console.error('Event not found:', currentEventId);
+                alert('Virhe: Tapahtumaa ei löydy. Palataan päänäkymään.');
+                showMainView();
                 return;
             }
             document.getElementById('eventTitle').textContent = event.location;
             document.getElementById('eventDiveMaster').textContent = event.diveMaster;
             document.getElementById('eventDate').textContent = event.date;
             const diverList = document.getElementById('diverList');
-            diverList.innerHTML = '';
+            if (diverList) {
+                diverList.innerHTML = '';
 
-            // Add header row
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'row align-items-center font-weight-bold mb-2';
-            headerDiv.innerHTML = `
-                <div class="col-md-3">Nimi</div>
-                <div class="col-md-1">Pullon koko</div>
-                <div class="col-md-1">Paine</div>
-                <div class="col-md-1">Kaasu</div>
-                <div class="col-md-1">Suunniteltu aika</div>
-                <div class="col-md-1">Suunniteltu syvyys</div>
-                <div class="col-md-2">Pari</div>
-                <div class="col-md-2">Muistiinpanot</div>
-                <div class="col-md-1">Aloitus</div>
-                <div class="col-md-1">Aika</div>
-            `;
-            diverList.appendChild(headerDiv);
+                // Add header row
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'row align-items-center font-weight-bold mb-2';
+                headerDiv.innerHTML = `
+                    <div class="col-md-3">Nimi</div>
+                    <div class="col-md-1">Pullon koko</div>
+                    <div class="col-md-1">Paine</div>
+                    <div class="col-md-1">Kaasu</div>
+                    <div class="col-md-1">Suunniteltu aika</div>
+                    <div class="col-md-1">Suunniteltu syvyys</div>
+                    <div class="col-md-2">Pari</div>
+                    <div class="col-md-2">Muistiinpanot</div>
+                    <div class="col-md-1">Aloitus</div>
+                    <div class="col-md-1">Aika</div>
+                `;
+                diverList.appendChild(headerDiv);
 
-            // List divers in order of addition
-            event.divers.forEach((diver, index) => {
-                const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                // Calculate diveTime and timeLeft based on real time
-                let diveTime = diver.diveTime;
-                let timeLeft = diver.timeLeft;
-                if (diver.diveStarted && !diver.diveEnded && !diver.paused) {
-                    const now = Date.now();
-                    const totalPausedTime = diver.totalPausedTime || 0;
-                    diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Seconds since start
-                    timeLeft = parseInt(diver.plannedTime) - Math.floor(diveTime / 60); // Minutes remaining
-                    diver.diveTime = diveTime;
-                    diver.timeLeft = timeLeft;
-                    localStorage.setItem('diveEvents', JSON.stringify(events));
-                }
-                const div = document.createElement('div');
-                div.className = 'diver-row';
-                div.innerHTML = `
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <span class="diver-name">${diver.name}</span>
-                            <div class="action-buttons">
-                                ${diver.diveStarted && !diver.diveEnded ? `
-                                    ${diver.paused ? `
-                                        <span class="resume-icon" onclick="resumeDive('${diver.id}')" aria-label="Jatka sukellus">▶️</span>
-                                        <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                // List divers in order of addition
+                event.divers.forEach((diver, index) => {
+                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
+                    // Calculate diveTime and timeLeft based on real time
+                    let diveTime = diver.diveTime;
+                    let timeLeft = diver.timeLeft;
+                    if (diver.diveStarted && !diver.diveEnded && !diver.paused) {
+                        const now = Date.now();
+                        const totalPausedTime = diver.totalPausedTime || 0;
+                        diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Seconds since start
+                        timeLeft = parseInt(diver.plannedTime) - Math.floor(diveTime / 60); // Minutes remaining
+                        diver.diveTime = diveTime;
+                        diver.timeLeft = timeLeft;
+                        localStorage.setItem('diveEvents', JSON.stringify(events));
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'diver-row';
+                    div.innerHTML = `
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="diver-name">${diver.name}</span>
+                                <div class="action-buttons">
+                                    ${diver.diveStarted && !diver.diveEnded ? `
+                                        ${diver.paused ? `
+                                            <span class="resume-icon" onclick="resumeDive('${diver.id}')" aria-label="Jatka sukellus">▶️</span>
+                                            <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                        ` : `
+                                            <span class="pause-icon" onclick="pauseDive('${diver.id}')" aria-label="Keskeytä sukellus">⏸️</span>
+                                            <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                        `}
+                                    ` : diver.diveEnded ? `
+                                        <span class="surface-text">Pinnalla</span>
                                     ` : `
-                                        <span class="pause-icon" onclick="pauseDive('${diver.id}')" aria-label="Keskeytä sukellus">⏸️</span>
-                                        <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                        ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')" aria-label="Aloita sukellus">▶️</span>` : ''}
+                                        <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')" aria-label="Poista sukeltaja">🗑️</span>
                                     `}
-                                ` : diver.diveEnded ? `
-                                    <span class="surface-text">Pinnalla</span>
-                                ` : `
-                                    ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')" aria-label="Aloita sukellus">▶️</span>` : ''}
-                                    <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')" aria-label="Poista sukeltaja">🗑️</span>
-                                `}
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä tiedot'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
-                        </div>
-                        <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : ''}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
-                        </div>
-                        <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä tiedot'}</span>` : `<span>${diver.gas || ''}</span>`}
-                        </div>
-                        <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
-                        </div>
-                        <div class="col-md-1">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
-                        </div>
-                        <div class="col-md-2">
-                            ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
-                        </div>
-                        <div class="col-md-2">
-                            <span class="input-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveStarted ? `<span class="clock-time">${diver.startTime || ''}${diver.diveEnded ? `<br>${diver.endTime || ''}` : ''}</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveStarted || diver.diveEnded ? `
-                                <span class="dive-time ${timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">
-                                    ${formatTime(diveTime)}${diver.diveStarted && !diver.diveEnded ? ` (${formatTime(timeLeft * 60)})` : ''}
-                                </span>
-                            ` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä tiedot'}</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.airConsumption ? `<span class="post-dive-data">${diver.airConsumption} L</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.maxDepth ? `${diver.maxDepth} m` : 'Syötä tiedot'}</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.averageDepth ? `${diver.averageDepth} m` : 'Syötä tiedot'}</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.airConsumptionPerMin ? `<span class="post-dive-data">${diver.airConsumptionPerMin} l/min</span>` : ''}
-                        </div>
-                    </div>`;
-                diverList.appendChild(div);
-                if (index < event.divers.length - 1) {
-                    const hr = document.createElement('hr');
-                    hr.className = 'diver-divider';
-                    diverList.appendChild(hr);
-                }
-            });
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä tiedot'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : ''}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä tiedot'}</span>` : `<span>${diver.gas || ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
+                            </div>
+                            <div class="col-md-2">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
+                            </div>
+                            <div class="col-md-2">
+                                <span class="input-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveStarted ? `<span class="clock-time">${diver.startTime || ''}${diver.diveEnded ? `<br>${diver.endTime || ''}` : ''}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveStarted || diver.diveEnded ? `
+                                    <span class="dive-time ${timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">
+                                        ${formatTime(diveTime)}${diver.diveStarted && !diver.diveEnded ? ` (${formatTime(timeLeft * 60)})` : ''}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.airConsumption ? `<span class="post-dive-data">${diver.airConsumption} L</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.maxDepth ? `${diver.maxDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.averageDepth ? `${diver.averageDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.airConsumptionPerMin ? `<span class="post-dive-data">${diver.airConsumptionPerMin} l/min</span>` : ''}
+                            </div>
+                        </div>`;
+                    diverList.appendChild(div);
+                    if (index < event.divers.length - 1) {
+                        const hr = document.createElement('hr');
+                        hr.className = 'diver-divider';
+                        diverList.appendChild(hr);
+                    }
+                });
 
-            document.getElementById('endEventBtn').style.display = event.divers.every(d => d.diveEnded) && !event.ended ? 'inline-block' : 'none';
-            document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
+                document.getElementById('endEventBtn').style.display = event.divers.every(d => d.diveEnded) && !event.ended ? 'inline-block' : 'none';
+                document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
+            } else {
+                console.error('Diver list element not found');
+                alert('Virhe: Sukeltajalistaa ei löydy. Tarkista HTML-rakenne.');
+            }
         }
 
         // Check if diver is ready to start
@@ -1052,93 +1099,6 @@
                     const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
                     doc.text(plannedLines, 15, y);
                     y += plannedLines.length * 7;
-                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Loprex Dive
-        function resumeDive(diverId) {
-            console.log('Resuming dive for diver:', diverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            diver.paused = false;
-            diver.totalPausedTime += Date.now() - diver.pauseTimestamp;
-            diver.pauseTimestamp = null;
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            loadEventDetails();
-        }
-
-        // Stop dive
-        function stopDive(diverId) {
-            console.log('Stopping dive for diver:', diverId);
-            const event = events.find(e => e.id === currentEventId);
-            const diver = event.divers.find(d => d.id === diverId);
-            if (confirm(`Haluatko varmasti päättää sukelluksen sukeltajalle ${diver.name}?`)) {
-                clearInterval(timers[diverId]);
-                delete timers[diverId];
-                diver.diveEnded = true;
-                diver.paused = false;
-                const now = Date.now();
-                diver.endTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
-                const totalPausedTime = diver.totalPausedTime || 0;
-                diver.diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Final dive time in seconds
-                diver.timeLeft = parseInt(diver.plannedTime) - Math.floor(diver.diveTime / 60); // Final time left
-                diver.pauseTimestamp = null;
-                diver.totalPausedTime = 0;
-                localStorage.setItem('diveEvents', JSON.stringify(events));
-                loadEventDetails();
-            }
-        }
-
-        // End event
-        function endEvent() {
-            console.log('Ending event:', currentEventId);
-            const event = events.find(e => e.id === currentEventId);
-            event.ended = true;
-            localStorage.setItem('diveEvents', JSON.stringify(events));
-            loadEventDetails();
-        }
-
-        // Format time (seconds to min:sec)
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = seconds % 60;
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
-        // Generate PDF
-        function generatePdf() {
-            console.log('Generating PDF for event:', currentEventId);
-            try {
-                const { jsPDF } = window.jspdf;
-                if (!jsPDF) {
-                    throw new Error('jsPDF library not loaded');
-                }
-                const doc = new jsPDF({ orientation: 'portrait' });
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const maxLineWidth = pageWidth - 30;
-
-                const event = events.find(e => e.id === currentEventId);
-                if (!event) {
-                    throw new Error('Event not found for ID: ' + currentEventId);
-                }
-
-                doc.setFontSize(16);
-                doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
-                doc.setFontSize(12);
-                doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
-                doc.text(`Päivämäärä: ${event.date}`, 10, 30);
-                doc.text('Sukeltajat:', 10, 40);
-
-                let y = 50;
-                event.divers.forEach(diver => {
-                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
-                    doc.setFontSize(18);
-                    doc.setFont('helvetica', 'bold');
-                    doc.text(`${diver.name || 'Nimetön'}`, 10, y);
-                    doc.setFontSize(12);
-                    doc.setFont('helvetica', 'normal');
-                    y += 7;
-                    const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
-                    const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
-                    doc.text(plannedLines, 15, y);
-                    y += plannedLines.length * 7;
                     const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
                     const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
                     doc.text(actualLines, 15, y);
@@ -1162,9 +1122,23 @@
         }
 
         // Initialize
-        console.log('Initializing application');
-        loadTheme();
-        showMainView();
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing application');
+            loadTheme();
+            showMainView();
+
+            // Add event listener for new event button
+            const newEventButton = document.getElementById('newEventButton');
+            if (newEventButton) {
+                newEventButton.addEventListener('click', function() {
+                    console.log('New event button clicked');
+                    showNewEventForm();
+                });
+            } else {
+                console.error('New event button not found');
+                alert('Virhe: Uusi Tapahtuma -painiketta ei löydy. Tarkista HTML-rakenne.');
+            }
+        });
     </script>
 </body>
 </html>
