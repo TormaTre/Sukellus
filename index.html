@@ -194,7 +194,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
-        <div class="version-text">Versio 0.71 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.72 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
@@ -212,7 +212,7 @@
             <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
             <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
         </form>
-        <div class="version-text">Versio 0.71 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.72 Lassi Hakala 2025</div>
     </div>
 
     <!-- Event View -->
@@ -254,7 +254,7 @@
                         <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
                     </div>
                     <div class="mb-3">
-Label for="pressureInput" class="form-label">Paine (bar)</label>
+                        <label for="pressureInput" class="form-label">Paine (bar)</label>
                         <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
                     </div>
                     <div class="mb-3">
@@ -318,7 +318,7 @@ Label for="pressureInput" class="form-label">Paine (bar)</label>
                     <input type="text" class="form-control" id="notesInput" placeholder="Muistiinpanot">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Per<EventSource>uuta</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
                     <button type="button" class="btn btn-primary" onclick="saveNotes()">Tallenna</button>
                 </div>
             </div>
@@ -402,6 +402,7 @@ Label for="pressureInput" class="form-label">Paine (bar)</label>
             console.log('Restoring events');
             const file = event.target.files[0];
             if (!file) {
+               -midnight
                 console.error('No file selected');
                 alert('Valitse JSON-tiedosto palauttaaksesi tapahtumat.');
                 return;
@@ -725,21 +726,16 @@ Label for="pressureInput" class="form-label">Paine (bar)</label>
             const headerDiv = document.createElement('div');
             headerDiv.className = 'row align-items-center font-weight-bold mb-2';
             headerDiv.innerHTML = `
-                <div class="col-md-2">Nimi</div>
+                <div class="col-md-3">Nimi</div>
                 <div class="col-md-1">Pullon koko</div>
                 <div class="col-md-1">Paine</div>
                 <div class="col-md-1">Kaasu</div>
                 <div class="col-md-1">Suunniteltu aika</div>
                 <div class="col-md-1">Suunniteltu syvyys</div>
-                <div class="col-md-1">Pari</div>
+                <div class="col-md-2">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
                 <div class="col-md-1">Aloitus</div>
                 <div class="col-md-1">Aika</div>
-                <div class="col-md-1">Lopullinen paine</div>
-                <div class="col-md-1">Käytetty kaasu</div>
-                <div class="col-md-1">Maksimi syvyys</div>
-                <div class="col-md-1">Keskisyvyys</div>
-                <div class="col-md-1">Ilmankulutus/min</div>
             `;
             diverList.appendChild(headerDiv);
 
@@ -762,7 +758,7 @@ Label for="pressureInput" class="form-label">Paine (bar)</label>
                 div.className = 'diver-row';
                 div.innerHTML = `
                     <div class="row align-items-center">
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <span class="diver-name">${diver.name}</span>
                             <div class="action-buttons">
                                 ${diver.diveStarted && !diver.diveEnded ? `
@@ -796,7 +792,7 @@ Label for="pressureInput" class="form-label">Paine (bar)</label>
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
                         </div>
                         <div class="col-md-2">
