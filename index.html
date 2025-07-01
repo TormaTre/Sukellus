@@ -606,106 +606,75 @@
             modal.show();
         }
 
+        // Save buddies
         function saveBuddies() {
-    console.log('Saving buddies for diver:', currentDiverId);
-    const event = events.find(e => e.id === currentEventId);
-    const diver = event.divers.find(d => d.id === currentDiverId);
-    const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
-    const newBuddies = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.dataset.buddyId);
+            console.log('Saving buddies for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
+            const newBuddies = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.buddyId);
 
-    // Update the current diver's buddies
-    diver.buddies = newBuddies;
-    console.log(`Updated ${diver.name}'s buddies:`, newBuddies);
+            // Update the current diver's buddies
+            diver.buddies = newBuddies;
+            console.log(`Updated ${diver.name}'s buddies:`, newBuddies);
 
-    // Convert current diver's plannedDepth and plannedTime to numbers for validation
-    const diverDepth = diver.plannedDepth ? parseFloat(diver.plannedDepth) : null;
-    const diverTime = diver.plannedTime ? parseInt(diver.plannedTime, 10) : null;
-    console.log(`Current diver (${diver.name}) depth: ${diverDepth}, time: ${diverTime}`);
+            // Convert current diver's plannedDepth and plannedTime to numbers for validation
+            const diverDepth = diver.plannedDepth ? parseFloat(diver.plannedDepth) : null;
+            const diverTime = diver.plannedTime ? parseInt(diver.plannedTime, 10) : null;
+            console.log(`Current diver (${diver.name}) depth: ${diverDepth}, time: ${diverTime}`);
 
-    // Handle buddy assignments and copy planned depth/time
-    event.divers.forEach(d => {
-        if (d.id !== currentDiverId) {
-            // Mutual buddy assignment
-            if (newBuddies.includes(d.id)) {
-                if (!d.buddies.includes(currentDiverId)) {
-                    d.buddies.push(currentDiverId);
-                    console.log(`Added ${diver.name} to ${d.name}'s buddies`);
-                }
-            } else {
-                d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
-                console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
-            }
-
-            // Copy planned depth and time to buddy if empty and current diver has valid values
-            if (newBuddies.includes(d.id)) {
-                if ((!d.plannedDepth || d.plannedDepth === "") && diverDepth) {
-                    d.plannedDepth = diverDepth.toString(); // Store as string to match input format
-                    console.log(`Copied planned depth ${diverDepth} m to ${d.name}`);
-                }
-                if ((!d.plannedTime || d.plannedTime === "") && diverTime) {
-                    d.plannedTime = diverTime.toString(); // Store as string to match input format
-                    d.timeLeft = diverTime; // Update timeLeft as number
-                    console.log(`Copied planned time ${diverTime} min to ${d.name}, updated timeLeft: ${d.timeLeft}`);
-                }
-            }
-        }
-    });
-
-    // Handle group buddy consistency (3 or more divers)
-    if (newBuddies.length >= 2) { // Group of 3 or more (current diver + 2 or more buddies)
-        const group = [currentDiverId, ...newBuddies];
-        console.log('Group detected:', group.map(id => event.divers.find(d => d.id === id)?.name || id));
-        // Ensure all divers in the group have the same buddy list and copied values
-        event.divers.forEach(d => {
-            if (group.includes(d.id)) {
-                // Set buddies to all other group members
-                const groupBuddies = group.filter(id => id !== d.id);
-                d.buddies = groupBuddies;
-                console.log(`Updated ${d.name}'s buddies to group:`, groupBuddies.map(id => event.divers.find(d => d.id === id)?.name || id));
-                // Copy planned depth and time if empty and current diver has valid values
+            // Handle buddy assignments and copy planned depth/time
+            event.divers.forEach(d => {
                 if (d.id !== currentDiverId) {
-                    if ((!d.plannedDepth || d.plannedDepth === "") && diverDepth) {
-                        d.plannedDepth = diverDepth.toString();
-                        console.log(`Copied planned depth ${diverDepth} m to ${d.name} (group)`);
+                    // Mutual buddy assignment
+                    if (newBuddies.includes(d.id)) {
+                        if (!d.buddies.includes(currentDiverId)) {
+                            d.buddies.push(currentDiverId);
+                            console.log(`Added ${diver.name} to ${d.name}'s buddies`);
+                        }
+                    } else {
+                        d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
+                        console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
                     }
-                    if ((!d.plannedTime || d.plannedTime === "") && diverTime) {
-                        d.plannedTime = diverTime.toString();
-                        d.timeLeft = diverTime;
-                        console.log(`Copied planned time ${diverTime} min to ${d.name} (group), updated timeLeft: ${d.timeLeft}`);
+
+                    // Copy planned depth and time to buddy if empty and current diver has valid values
+                    if (newBuddies.includes(d.id)) {
+                        if ((!d.plannedDepth || d.plannedDepth === "") && diverDepth) {
+                            d.plannedDepth = diverDepth.toString(); // Store as string to match input format
+                            console.log(`Copied planned depth ${diverDepth} m to ${d.name}`);
+                        }
+                        if ((!d.plannedTime || d.plannedTime === "") && diverTime) {
+                            d.plannedTime = diverTime.toString(); // Store as string to match input format
+                            d.timeLeft = diverTime; // Update timeLeft as number
+                            console.log(`Copied planned time ${diverTime} min to ${d.name}, updated timeLeft: ${d.timeLeft}`);
+                        }
                     }
                 }
-            }
-        });
-    }
-
-    localStorage.setItem('diveEvents', JSON.stringify(events));
-    const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
-    modal.hide();
-    loadEventDetails();
-}
+            });
 
             // Handle group buddy consistency (3 or more divers)
             if (newBuddies.length >= 2) { // Group of 3 or more (current diver + 2 or more buddies)
                 const group = [currentDiverId, ...newBuddies];
-                console.log('Group detected:', group);
-                // Ensure all divers in the group have the same buddy list (all other group members)
+                console.log('Group detected:', group.map(id => event.divers.find(d => d.id === id)?.name || id));
+                // Ensure all divers in the group have the same buddy list and copied values
                 event.divers.forEach(d => {
                     if (group.includes(d.id)) {
                         // Set buddies to all other group members
-                        d.buddies = group.filter(id => id !== d.id);
-                        console.log(`Updated ${d.name}'s buddies to group:`, d.buddies);
-                        // Copy planned depth and time from current diver to group members if empty
+                        const groupBuddies = group.filter(id => id !== d.id);
+                        d.buddies = groupBuddies;
+                        console.log(`Updated ${d.name}'s buddies to group:`, groupBuddies.map(id => event.divers.find(d => d.id === id)?.name || id));
+                        // Copy planned depth and time if empty and current diver has valid values
                         if (d.id !== currentDiverId) {
-                            if (!d.plannedDepth && diver.plannedDepth) {
-                                d.plannedDepth = diver.plannedDepth;
-                                console.log(`Copied planned depth ${diver.plannedDepth} m to ${d.name} (group)`);
+                            if ((!d.plannedDepth || d.plannedDepth === "") && diverDepth) {
+                                d.plannedDepth = diverDepth.toString();
+                                console.log(`Copied planned depth ${diverDepth} m to ${d.name} (group)`);
                             }
-                            if (!d.plannedTime && diver.plannedTime) {
-                                d.plannedTime = diver.plannedTime;
-                                d.timeLeft = parseInt(diver.plannedTime);
-                                console.log(`Copied planned time ${diver.plannedTime} min to ${d.name} (group)`);
+                            if ((!d.plannedTime || d.plannedTime === "") && diverTime) {
+                                d.plannedTime = diverTime.toString();
+                                d.timeLeft = diverTime;
+                                console.log(`Copied planned time ${diverTime} min to ${d.name} (group), updated timeLeft: ${d.timeLeft}`);
                             }
                         }
                     }
@@ -997,6 +966,93 @@
         }
 
         // Resume dive
+        function resumeDive(diverId) {
+            console.log('Resuming dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            diver.paused = false;
+            diver.totalPausedTime += Date.now() - diver.pauseTimestamp;
+            diver.pauseTimestamp = null;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Stop dive
+        function stopDive(diverId) {
+            console.log('Stopping dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            if (confirm(`Haluatko varmasti päättää sukelluksen sukeltajalle ${diver.name}?`)) {
+                clearInterval(timers[diverId]);
+                delete timers[diverId];
+                diver.diveEnded = true;
+                diver.paused = false;
+                const now = Date.now();
+                diver.endTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
+                const totalPausedTime = diver.totalPausedTime || 0;
+                diver.diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Final dive time in seconds
+                diver.timeLeft = parseInt(diver.plannedTime) - Math.floor(diver.diveTime / 60); // Final time left
+                diver.pauseTimestamp = null;
+                diver.totalPausedTime = 0;
+                localStorage.setItem('diveEvents', JSON.stringify(events));
+                loadEventDetails();
+            }
+        }
+
+        // End event
+        function endEvent() {
+            console.log('Ending event:', currentEventId);
+            const event = events.find(e => e.id === currentEventId);
+            event.ended = true;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Format time (seconds to min:sec)
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // Generate PDF
+        function generatePdf() {
+            console.log('Generating PDF for event:', currentEventId);
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library not loaded');
+                }
+                const doc = new jsPDF({ orientation: 'portrait' });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const maxLineWidth = pageWidth - 30;
+
+                const event = events.find(e => e.id === currentEventId);
+                if (!event) {
+                    throw new Error('Event not found for ID: ' + currentEventId);
+                }
+
+                doc.setFontSize(16);
+                doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
+                doc.setFontSize(12);
+                doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
+                doc.text(`Päivämäärä: ${event.date}`, 10, 30);
+                doc.text('Sukeltajat:', 10, 40);
+
+                let y = 50;
+                event.divers.forEach(diver => {
+                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
+                    doc.setFontSize(18);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${diver.name || 'Nimetön'}`, 10, y);
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                    y += 7;
+                    const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
+                    const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
+                    doc.text(plannedLines, 15, y);
+                    y += plannedLines.length * 7;
+                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Loprex Dive
         function resumeDive(diverId) {
             console.log('Resuming dive for diver:', diverId);
             const event = events.find(e => e.id === currentEventId);
