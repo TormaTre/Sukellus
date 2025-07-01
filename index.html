@@ -118,6 +118,9 @@
         .clock-time {
             font-size: 1.2em;
         }
+        .post-dive-data {
+            font-size: 1.2em;
+        }
 
         /* Responsive styles for small screens */
         @media (max-width: 767.98px) {
@@ -150,6 +153,9 @@
             .clock-time {
                 font-size: 1.0em;
             }
+            .post-dive-data {
+                font-size: 1.0em;
+            }
         }
     </style>
 </head>
@@ -170,7 +176,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
-        <div class="version-text">Versio 0.6 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.7 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
@@ -188,7 +194,7 @@
             <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
             <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
         </form>
-        <div class="version-text">Versio 0.6 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.7 Lassi Hakala 2025</div>
     </div>
 
     <!-- Event View -->
@@ -301,20 +307,31 @@
         </div>
     </div>
 
-    <!-- Final Pressure Modal -->
-    <div class="modal fade" id="finalPressureModal" tabindex="-1" aria-labelledby="finalPressureModalLabel" aria-hidden="true">
+    <!-- Post-Dive Data Modal -->
+    <div class="modal fade" id="postDiveModal" tabindex="-1" aria-labelledby="postDiveModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="finalPressureModalLabel">Syötä Lopullinen Paine</h5>
+                    <h5 class="modal-title" id="postDiveModalLabel">Syötä Sukelluksen Jälkeiset Tiedot</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="number" class="form-control" id="finalPressureInput" placeholder="Lopullinen paine (bar)" min="0">
+                    <div class="mb-3">
+                        <label for="finalPressureInput" class="form-label">Lopullinen Paine (bar)</label>
+                        <input type="number" class="form-control" id="finalPressureInput" placeholder="Lopullinen paine (bar)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxDepthInput" class="form-label">Maksimi syvyys (m)</label>
+                        <input type="number" class="form-control" id="maxDepthInput" placeholder="Maksimi syvyys (m)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="averageDepthInput" class="form-label">Keskisyvyys (m, valinnainen)</label>
+                        <input type="number" class="form-control" id="averageDepthInput" placeholder="Keskisyvyys (m)" min="0">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-                    <button type="button" class="btn btn-primary" onclick="saveFinalPressure()">Tallenna</button>
+                    <button type="button" class="btn btn-primary" onclick="savePostDiveDetails()">Tallenna</button>
                 </div>
             </div>
         </div>
@@ -623,32 +640,51 @@
             loadEventDetails();
         }
 
-        // Open final pressure modal
-        function openFinalPressureModal(diverId) {
-            console.log('Opening final pressure modal for diver:', diverId);
+        // Open post-dive data modal
+        function openPostDiveModal(diverId) {
+            console.log('Opening post-dive data modal for diver:', diverId);
             currentDiverId = diverId;
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === diverId);
             document.getElementById('finalPressureInput').value = diver.finalPressure || '';
-            const modal = new bootstrap.Modal(document.getElementById('finalPressureModal'));
+            document.getElementById('maxDepthInput').value = diver.maxDepth || '';
+            document.getElementById('averageDepthInput').value = diver.averageDepth || '';
+            const modal = new bootstrap.Modal(document.getElementById('postDiveModal'));
             modal.show();
         }
 
-        // Save final pressure
-        function saveFinalPressure() {
-            console.log('Saving final pressure for diver:', currentDiverId);
+        // Save post-dive data
+        function savePostDiveDetails() {
+            console.log('Saving post-dive details for diver:', currentDiverId);
             const event = events.find(e => e.id === currentEventId);
             const diver = event.divers.find(d => d.id === currentDiverId);
             const finalPressure = document.getElementById('finalPressureInput').value;
+            const maxDepth = document.getElementById('maxDepthInput').value;
+            const averageDepth = document.getElementById('averageDepthInput').value;
+
             diver.finalPressure = finalPressure;
-            if (diver.pressure && finalPressure) {
+            diver.maxDepth = maxDepth;
+            diver.averageDepth = averageDepth;
+
+            // Calculate air consumption (L)
+            if (diver.pressure && finalPressure && diver.bottleSize) {
                 const usedPressure = parseFloat(diver.pressure) - parseFloat(finalPressure);
                 diver.airConsumption = usedPressure * parseFloat(diver.bottleSize);
             } else {
                 diver.airConsumption = '';
             }
+
+            // Calculate air consumption per minute at surface (l/min)
+            if (diver.airConsumption && averageDepth && diver.diveTime) {
+                const diveTimeMinutes = diver.diveTime / 60;
+                const pressureCorrection = 10 / (10 + parseFloat(averageDepth));
+                diver.airConsumptionPerMin = ((diver.airConsumption / diveTimeMinutes) * pressureCorrection).toFixed(2);
+            } else {
+                diver.airConsumptionPerMin = '';
+            }
+
             localStorage.setItem('diveEvents', JSON.stringify(events));
-            const modal = bootstrap.Modal.getInstance(document.getElementById('finalPressureModal'));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('postDiveModal'));
             modal.hide();
             loadEventDetails();
         }
@@ -679,7 +715,7 @@
                 <div class="col-md-1">Suunniteltu syvyys</div>
                 <div class="col-md-1">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
-                <div class="col-md-1">Aloitus</div>
+                <div class="col-md-1">Kellonaika</div>
                 <div class="col-md-1">Aika</div>
             `;
             diverList.appendChild(headerDiv);
@@ -692,8 +728,8 @@
                 let timeLeft = diver.timeLeft;
                 if (diver.diveStarted && !diver.diveEnded && !diver.paused) {
                     const now = Date.now();
-                    const startTimestamp = diver.startTimestamp || now;
-                    diveTime = Math.floor((now - startTimestamp) / 1000); // Seconds since start
+                    const totalPausedTime = diver.totalPausedTime || 0;
+                    diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Seconds since start
                     timeLeft = parseInt(diver.plannedTime) - Math.floor(diveTime / 60); // Minutes remaining
                     diver.diveTime = diveTime;
                     diver.timeLeft = timeLeft;
@@ -736,10 +772,19 @@
                             ` : ''}
                         </div>
                         <div class="col-md-1">
-                            ${diver.diveEnded ? `<span class="input-span" onclick="openFinalPressureModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä paine'}</span>` : ''}
+                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä tiedot'}</span>` : ''}
                         </div>
                         <div class="col-md-1">
-                            ${diver.airConsumption ? `<span>${diver.airConsumption} L</span>` : ''}
+                            ${diver.airConsumption ? `<span class="post-dive-data">${diver.airConsumption} L</span>` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.maxDepth ? `${diver.maxDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.averageDepth ? `${diver.averageDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                        </div>
+                        <div class="col-md-1">
+                            ${diver.airConsumptionPerMin ? `<span class="post-dive-data">${diver.airConsumptionPerMin} l/min</span>` : ''}
                         </div>
                         <div class="col-md-1">
                             ${diver.diveStarted && !diver.diveEnded ? `
@@ -803,7 +848,10 @@
                 startTime: '',
                 endTime: '',
                 finalPressure: '',
-                airConsumption: ''
+                airConsumption: '',
+                maxDepth: '',
+                averageDepth: '',
+                airConsumptionPerMin: ''
             };
             event.divers.push(diver);
             localStorage.setItem('diveEvents', JSON.stringify(events));
@@ -876,6 +924,7 @@
                 diver.totalPausedTime = 0;
                 localStorage.setItem('diveEvents', JSON.stringify(events));
                 loadEventDetails();
+                openPostDiveModal(diverId); // Automatically open post-dive modal
             }
         }
 
@@ -932,10 +981,14 @@
                     const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
                     doc.text(plannedLines, 15, y);
                     y += plannedLines.length * 7;
-                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Lopullinen paine: ${diver.finalPressure || '-'} bar, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}, Käytetty kaasu: ${diver.airConsumption || '-'} L`;
+                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
                     const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
                     doc.text(actualLines, 15, y);
                     y += actualLines.length * 7;
+                    const postDiveText = `Käytetty kaasu: ${diver.airConsumption || '-'} L, Maksimi syvyys: ${diver.maxDepth || '-'} m, Keskisyvyys: ${diver.averageDepth || '-'} m, Ilmankulutus pinnalla: ${diver.airConsumptionPerMin || '-'} l/min`;
+                    const postDiveLines = doc.splitTextToSize(postDiveText, maxLineWidth);
+                    doc.text(postDiveLines, 15, y);
+                    y += postDiveLines.length * 7;
                     if (y > 270) {
                         doc.addPage();
                         y = 10;
