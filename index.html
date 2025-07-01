@@ -121,6 +121,17 @@
         .post-dive-data {
             font-size: 1.2em;
         }
+        .action-buttons {
+            margin-top: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .action-buttons .surface-text {
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
 
         /* Responsive styles for small screens */
         @media (max-width: 767.98px) {
@@ -148,12 +159,19 @@
                 font-size: 1.5em;
             }
             .surface-text {
-                font-size: 1.5em;
+                font-size: 1.0em;
             }
             .clock-time {
                 font-size: 1.0em;
             }
             .post-dive-data {
+                font-size: 1.0em;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .action-buttons .surface-text {
                 font-size: 1.0em;
             }
         }
@@ -176,7 +194,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
-        <div class="version-text">Versio 0.7 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.71 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
@@ -194,7 +212,7 @@
             <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
             <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
         </form>
-        <div class="version-text">Versio 0.7 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.71 Lassi Hakala 2025</div>
     </div>
 
     <!-- Event View -->
@@ -236,7 +254,7 @@
                         <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
                     </div>
                     <div class="mb-3">
-                        <label for="pressureInput" class="form-label">Paine (bar)</label>
+Label for="pressureInput" class="form-label">Paine (bar)</label>
                         <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
                     </div>
                     <div class="mb-3">
@@ -300,7 +318,7 @@
                     <input type="text" class="form-control" id="notesInput" placeholder="Muistiinpanot">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Per<EventSource>uuta</button>
                     <button type="button" class="btn btn-primary" onclick="saveNotes()">Tallenna</button>
                 </div>
             </div>
@@ -715,8 +733,13 @@
                 <div class="col-md-1">Suunniteltu syvyys</div>
                 <div class="col-md-1">Pari</div>
                 <div class="col-md-2">Muistiinpanot</div>
-                <div class="col-md-1">Kellonaika</div>
+                <div class="col-md-1">Aloitus</div>
                 <div class="col-md-1">Aika</div>
+                <div class="col-md-1">Lopullinen paine</div>
+                <div class="col-md-1">Käytetty kaasu</div>
+                <div class="col-md-1">Maksimi syvyys</div>
+                <div class="col-md-1">Keskisyvyys</div>
+                <div class="col-md-1">Ilmankulutus/min</div>
             `;
             diverList.appendChild(headerDiv);
 
@@ -739,7 +762,25 @@
                 div.className = 'diver-row';
                 div.innerHTML = `
                     <div class="row align-items-center">
-                        <div class="col-md-2"><span class="diver-name">${diver.name}</span></div>
+                        <div class="col-md-2">
+                            <span class="diver-name">${diver.name}</span>
+                            <div class="action-buttons">
+                                ${diver.diveStarted && !diver.diveEnded ? `
+                                    ${diver.paused ? `
+                                        <span class="resume-icon" onclick="resumeDive('${diver.id}')" aria-label="Jatka sukellus">▶️</span>
+                                        <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                    ` : `
+                                        <span class="pause-icon" onclick="pauseDive('${diver.id}')" aria-label="Keskeytä sukellus">⏸️</span>
+                                        <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                    `}
+                                ` : diver.diveEnded ? `
+                                    <span class="surface-text">Pinnalla</span>
+                                ` : `
+                                    ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')" aria-label="Aloita sukellus">▶️</span>` : ''}
+                                    <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')" aria-label="Poista sukeltaja">🗑️</span>
+                                `}
+                            </div>
+                        </div>
                         <div class="col-md-1">
                             ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä tiedot'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
                         </div>
@@ -785,22 +826,6 @@
                         </div>
                         <div class="col-md-1">
                             ${diver.airConsumptionPerMin ? `<span class="post-dive-data">${diver.airConsumptionPerMin} l/min</span>` : ''}
-                        </div>
-                        <div class="col-md-1">
-                            ${diver.diveStarted && !diver.diveEnded ? `
-                                ${diver.paused ? `
-                                    <span class="resume-icon" onclick="resumeDive('${diver.id}')">▶️</span>
-                                    <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
-                                ` : `
-                                    <span class="pause-icon" onclick="pauseDive('${diver.id}')">⏸️</span>
-                                    <span class="stop-icon" onclick="stopDive('${diver.id}')">⏹️</span>
-                                `}
-                            ` : diver.diveEnded ? `
-                                <span class="surface-text">Pinnalla</span>
-                            ` : `
-                                ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')">▶️</span>` : ''}
-                                <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')">🗑️</span>
-                            `}
                         </div>
                     </div>`;
                 diverList.appendChild(div);
@@ -924,7 +949,6 @@
                 diver.totalPausedTime = 0;
                 localStorage.setItem('diveEvents', JSON.stringify(events));
                 loadEventDetails();
-                openPostDiveModal(diverId); // Automatically open post-dive modal
             }
         }
 
