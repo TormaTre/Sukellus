@@ -143,7 +143,7 @@
             .diver-row .row {
                 flex-direction: column;
             }
-            .diver-row .col-md-1, .diver-row .col-md-2 {
+            .diver-row .col-md-1, .diver-row .col-md-2, .diver-row .col-md-3 {
                 width: 100%;
                 margin-bottom: 10px;
             }
@@ -194,7 +194,7 @@
                 <label class="form-check-label" for="themeToggle">Tumma tila</label>
             </div>
         </div>
-        <div class="version-text">Versio 0.72 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.73 Lassi Hakala 2025</div>
     </div>
 
     <!-- New Event Form -->
@@ -212,7 +212,7 @@
             <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
             <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
         </form>
-        <div class="version-text">Versio 0.72 Lassi Hakala 2025</div>
+        <div class="version-text">Versio 0.73 Lassi Hakala 2025</div>
     </div>
 
     <!-- Event View -->
@@ -402,7 +402,6 @@
             console.log('Restoring events');
             const file = event.target.files[0];
             if (!file) {
-               -midnight
                 console.error('No file selected');
                 alert('Valitse JSON-tiedosto palauttaaksesi tapahtumat.');
                 return;
@@ -616,9 +615,14 @@
             const newBuddies = Array.from(checkboxes)
                 .filter(cb => cb.checked)
                 .map(cb => cb.dataset.buddyId);
+
+            // Update the current diver's buddies
             diver.buddies = newBuddies;
+
+            // Handle mutual buddy assignments and copy planned depth/time
             event.divers.forEach(d => {
                 if (d.id !== currentDiverId) {
+                    // Mutual buddy assignment
                     if (newBuddies.includes(d.id)) {
                         if (!d.buddies.includes(currentDiverId)) {
                             d.buddies.push(currentDiverId);
@@ -628,8 +632,48 @@
                         d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
                         console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
                     }
+
+                    // Copy planned depth and time to buddy if empty
+                    if (newBuddies.includes(d.id)) {
+                        if (!d.plannedDepth && diver.plannedDepth) {
+                            d.plannedDepth = diver.plannedDepth;
+                            console.log(`Copied planned depth ${diver.plannedDepth} m to ${d.name}`);
+                        }
+                        if (!d.plannedTime && diver.plannedTime) {
+                            d.plannedTime = diver.plannedTime;
+                            d.timeLeft = parseInt(diver.plannedTime);
+                            console.log(`Copied planned time ${diver.plannedTime} min to ${d.name}`);
+                        }
+                    }
                 }
             });
+
+            // Handle group buddy consistency (3 or more divers)
+            if (newBuddies.length >= 2) { // Group of 3 or more (current diver + 2 or more buddies)
+                const group = [currentDiverId, ...newBuddies];
+                console.log('Group detected:', group);
+                // Ensure all divers in the group have the same buddy list (all other group members)
+                event.divers.forEach(d => {
+                    if (group.includes(d.id)) {
+                        // Set buddies to all other group members
+                        d.buddies = group.filter(id => id !== d.id);
+                        console.log(`Updated ${d.name}'s buddies to group:`, d.buddies);
+                        // Copy planned depth and time from current diver to group members if empty
+                        if (d.id !== currentDiverId) {
+                            if (!d.plannedDepth && diver.plannedDepth) {
+                                d.plannedDepth = diver.plannedDepth;
+                                console.log(`Copied planned depth ${diver.plannedDepth} m to ${d.name} (group)`);
+                            }
+                            if (!d.plannedTime && diver.plannedTime) {
+                                d.plannedTime = diver.plannedTime;
+                                d.timeLeft = parseInt(diver.plannedTime);
+                                console.log(`Copied planned time ${diver.plannedTime} min to ${d.name} (group)`);
+                            }
+                        }
+                    }
+                });
+            }
+
             localStorage.setItem('diveEvents', JSON.stringify(events));
             const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
             modal.hide();
